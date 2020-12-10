@@ -17,6 +17,9 @@ import com.google.android.material.button.MaterialButton;
 
 public class CustomButton extends androidx.appcompat.widget.AppCompatButton implements View.OnClickListener {
 
+    /*
+    Custom Button
+     */
 
     String contentDescription;
     Context context;
