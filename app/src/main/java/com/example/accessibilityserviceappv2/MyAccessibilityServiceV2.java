@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -24,8 +25,12 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,12 +42,18 @@ import java.util.List;
 public class MyAccessibilityServiceV2 extends AccessibilityService {
 
     FrameLayout mLayout;
+    LinearLayout lLayout;
     private static final String LOG_TAG = "MyActivity";
     public static String appname = "DummyApp";
     private Paint paint;
     Rect rectArray[];
     List<Rect> rectList = new ArrayList<>();
     int btnCounter;
+    View view;
+    TextView floatingView;
+    String buttonClickTextTest;
+    Boolean viewIsSet = false;
+
 
 
     @Override
@@ -61,10 +72,14 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
 
+            showFloatingWindow("init text");
+
+
 
 
             switch (e.getEventType()) {
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
+
                     logNodeHierarchy(getRootInActiveWindow(), 0);
                 }
 
@@ -161,6 +176,12 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         Rect rect = new Rect();
 
+        String contentDescription;
+        String viewText;
+        String hintText;
+
+
+
         if (nodeInfo == null) return;
 
 
@@ -190,20 +211,34 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         //lp.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-
-
         lp.gravity = Gravity.TOP | Gravity.RIGHT;
         lp.x = rect.centerX();
         lp.y = rect.centerY();
 
 
-        String contentDescription = "empty";
+
+        if(nodeInfo.getText()!=null){
+            viewText = nodeInfo.getText().toString();
+        }
+        else {
+            viewText = "empty";
+        }
 
         if(nodeInfo.getContentDescription()!=null){
             contentDescription = nodeInfo.getContentDescription().toString();
         }
+        else {
+            contentDescription = "empty";
+        }
 
-        CustomButton testBtn = new CustomButton(context, contentDescription);
+        if(nodeInfo.getHintText()!=null){
+            hintText = nodeInfo.getHintText().toString();
+        }
+        else {
+            hintText = "empty";
+        }
+
+        CustomButton testBtn = new CustomButton(context, btnCounter, viewText, contentDescription, hintText);
         Button testBtn2 = new Button(context);
         testBtn.setText(String.valueOf(btnCounter));
         testBtn.setContentDescription("auto button");
@@ -222,6 +257,13 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
         shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
         testBtn.setBackground(shapedrawable);
 
+        testBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                buttonClickTextTest = testBtn.showContent();
+                showFloatingWindow(buttonClickTextTest);
+            }
+        });
+
         wm.addView(testBtn, lp);
 
         btnCounter++;
@@ -233,6 +275,51 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         }
 
+
+    }
+
+    public void showFloatingWindow(String initText){
+        Context context = getApplicationContext();
+        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        lLayout = new LinearLayout(this);
+
+        if(viewIsSet){
+            wm.removeView(view);
+        }
+
+        Button testButton = new Button(context);
+
+        LinearLayout.LayoutParams llParameters = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT);
+
+        WindowManager.LayoutParams lp2 = new WindowManager.LayoutParams();
+
+
+        lp2.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        lp2.format = PixelFormat.TRANSLUCENT;
+        lp2.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        lp2.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp2.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp2.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        lp2.gravity = Gravity.BOTTOM | Gravity.END;
+        lp2.x = 0;
+        lp2.y = 0;
+
+
+        LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        view = layoutInflater.inflate(R.layout.floatingwindow, null);
+
+        TextView item = (TextView) view.findViewById(R.id.textView2);
+
+        item.setText(initText);
+
+
+        lLayout.setBackgroundColor(Color.RED);
+        lLayout.setLayoutParams(llParameters);
+
+        wm.addView(view,lp2);
+
+        viewIsSet = true;
 
     }
 
