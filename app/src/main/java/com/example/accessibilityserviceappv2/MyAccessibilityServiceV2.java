@@ -298,10 +298,10 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
         lp2.format = PixelFormat.TRANSLUCENT;
         lp2.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        lp2.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp2.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp2.height = WindowManager.LayoutParams.WRAP_CONTENT;
         lp2.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        lp2.gravity = Gravity.BOTTOM | Gravity.END;
+        lp2.gravity = Gravity.BOTTOM;
         lp2.x = 0;
         lp2.y = 0;
 
@@ -313,8 +313,6 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         item.setText(initText);
 
-
-        lLayout.setBackgroundColor(Color.RED);
         lLayout.setLayoutParams(llParameters);
 
         wm.addView(view,lp2);
