@@ -315,6 +315,42 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         lLayout.setLayoutParams(llParameters);
 
+        view.setOnTouchListener(new View.OnTouchListener() {
+
+            private WindowManager.LayoutParams updateParameters = lp2;
+            int x, y;
+            float touchedX, touchedY;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        y = updateParameters.y;
+
+
+                        Toast.makeText(getApplicationContext(), "onTouch", Toast.LENGTH_SHORT).show();
+
+
+                        touchedY = event.getRawY();
+
+                        break;
+
+                    case MotionEvent.ACTION_MOVE:
+                        updateParameters.y = (int) (y - (event.getRawY() - touchedY));
+
+                        wm.updateViewLayout(view, updateParameters);
+
+                    default:
+
+                        break;
+                }
+
+                return false;
+            }
+        });
+
+
         wm.addView(view,lp2);
 
         viewIsSet = true;
