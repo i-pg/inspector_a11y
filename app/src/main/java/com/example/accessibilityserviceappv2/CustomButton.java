@@ -109,4 +109,10 @@ public class CustomButton extends androidx.appcompat.widget.AppCompatButton /*im
         return this.contentDescription;
     }
 
+    public String showInformation(){
+        String InformationString = "<b>Element Nummer:</b> " + btnCounter + "<br><b>View Text: </b>" + viewText + "<br><b>Inhaltslabel:  </b>" + contentDescription + "<br><b>Hint: </b>" + hintText;
+
+        return InformationString;
+    }
+
 }

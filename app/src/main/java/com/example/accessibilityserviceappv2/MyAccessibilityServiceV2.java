@@ -3,6 +3,7 @@ package com.example.accessibilityserviceappv2;
 import android.accessibilityservice.AccessibilityService;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
+import android.text.Html;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
@@ -259,7 +260,7 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         testBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                buttonClickTextTest = testBtn.showContent();
+                buttonClickTextTest = testBtn.showInformation();
                 showFloatingWindow(buttonClickTextTest);
             }
         });
@@ -311,7 +312,7 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         TextView item = (TextView) view.findViewById(R.id.textView2);
 
-        item.setText(initText);
+        item.setText(Html.fromHtml(initText));
 
         lLayout.setLayoutParams(llParameters);
 
