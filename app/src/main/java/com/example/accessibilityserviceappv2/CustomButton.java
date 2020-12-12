@@ -99,11 +99,7 @@ public class CustomButton extends androidx.appcompat.widget.AppCompatButton /*im
 
     }
 */
-    public void openDialog(){
 
-        ExampleDialog exampleDialog = new ExampleDialog();
-
-    }
 
     public String showContent(){
         return this.contentDescription;

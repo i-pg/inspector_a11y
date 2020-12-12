@@ -1,8 +1,11 @@
 package com.example.accessibilityserviceappv2;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
+import android.net.Uri;
 import android.text.Html;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -31,14 +34,30 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+
 import org.w3c.dom.Text;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 import java.util.List;
+
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static java.net.Proxy.Type.HTTP;
 
 public class MyAccessibilityServiceV2 extends AccessibilityService {
 
@@ -82,6 +101,7 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
 
                     logNodeHierarchy(getRootInActiveWindow(), 0);
+                    addExportButton();
                 }
 
                 case AccessibilityEvent.TYPE_VIEW_CLICKED: {
@@ -357,5 +377,182 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
         viewIsSet = true;
 
     }
+
+
+    public void addExportButton(){
+
+        Context context = getApplicationContext();
+
+
+        Button exportButton = new Button(this);
+        exportButton.setText("Export Button");
+
+        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+
+        lp.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        //lp.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        lp.gravity = Gravity.TOP;
+        lp.x = 0;
+        lp.y = 0;
+
+        exportButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                //export();
+                //emailTest();
+                //intentTest();
+                String btnNumber = "Test Anzahl " + btnCounter;
+                //writeFileOnInternalStorage(context, "testFilename", "testFileBodyText");
+                //writeToFile(btnNumber, context);
+                String testText = readFromFile(context);
+                Log.v(LOG_TAG, testText);
+
+            }
+        });
+
+
+        wm.addView(exportButton, lp);
+
+    }
+
+
+    public void export(){
+
+        //generate data
+        StringBuilder data = new StringBuilder();
+        data.append("Time, Distance");
+        for(int i = 0; i<5; i++ ){
+            data.append("\n"+String.valueOf(i)+","+String.valueOf(i*i));
+        }
+
+        try{
+            //saving the file into device
+            FileOutputStream out = openFileOutput("data.csv", Context.MODE_PRIVATE);
+            out.write((data.toString()).getBytes());
+            out.close();
+
+            /*
+            //exporting
+            Context context = getApplicationContext();
+            File filelocation = new File(getFilesDir(), "data.csv");
+            Uri path = FileProvider.getUriForFile(context, "com.example.accessibilityserviceappv2.fileprovider", filelocation);
+            Intent fileIntent = new Intent();
+            fileIntent.setAction(Intent.ACTION_SEND);
+            fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Data");
+            fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            fileIntent.putExtra(Intent.EXTRA_STREAM, path);
+            fileIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            //fileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(Intent.createChooser(fileIntent, "Send Mail"));
+             */
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public void emailTest(){
+/*        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        //Intent emailIntent = new Intent(App.getContext(), App.class);
+        emailIntent.setType("text/html");
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"jon@example.com"}); // recipients
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Email subject");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "Email message text");
+        emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://path/to/email/attachment"));
+        emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        emailIntent.setComponent(new ComponentName(getApplicationContext().getPackageName(),  App.class.getName()));
+
+        startActivity(Intent.createChooser(emailIntent, "Send Email"));*/
+// You can also attach multiple items by passing an ArrayList of Uris
+
+    }
+
+    public void intentTest(){
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ComponentName cn = new ComponentName(this, MainActivity.class);
+        intent.setComponent(cn);
+        startActivity(intent);
+    }
+
+
+    public void writeFileOnInternalStorage(Context mcoContext, String sFileName, String sBody){
+        File dir = new File(mcoContext.getFilesDir(), "mydir");
+
+/*
+        try {
+            File myFile = new File("Your File name");
+            myFile.createNewFile();
+            FileOutputStream fOut = new FileOutputStream(myFile);
+            OutputStreamWriter myOutWriter =new OutputStreamWriter(fOut);
+            myOutWriter.append("testtext");
+            myOutWriter.close();
+            fOut.close();
+            Toast.makeText(getApplicationContext(), "Done writing SD 'mysdfile.txt", Toast.LENGTH_SHORT).show();
+
+        }
+        catch (Exception e)
+        {
+            Toast.makeText(getApplicationContext(), e.getMessage(),Toast.LENGTH_SHORT).show();
+        }*/
+
+
+
+    }
+
+    private void writeToFile(String data,Context context) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("mytesttext.txt", Context.MODE_PRIVATE));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+    private String readFromFile(Context context) {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = context.openFileInput("mytesttext.txt");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
+    }
+
 
 }
