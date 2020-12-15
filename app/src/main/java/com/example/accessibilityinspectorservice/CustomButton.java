@@ -1,4 +1,4 @@
-package com.example.accessibilityserviceappv2;
+package com.example.accessibilityinspectorservice;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -20,6 +20,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.accessibilityserviceappv2.R;
 import com.google.android.material.button.MaterialButton;
 
 public class CustomButton extends androidx.appcompat.widget.AppCompatButton /*implements View.OnClickListener*/ {

@@ -1,4 +1,4 @@
-package com.example.accessibilityserviceappv2;
+package com.example.accessibilityinspectorservice;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.ComponentName;
@@ -6,72 +6,48 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
-import android.net.Uri;
 import android.text.Html;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-
-import org.w3c.dom.Text;
+import com.example.accessibilityserviceappv2.R;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-
-import java.util.List;
-
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static java.net.Proxy.Type.HTTP;
-
-public class MyAccessibilityServiceV2 extends AccessibilityService {
+public class AccessibilityInspectorService extends AccessibilityService {
 
     FrameLayout mLayout;
     LinearLayout lLayout;
     private static final String LOG_TAG = "MyActivity";
     public static String appname = "DummyApp";
-    private Paint paint;
-    Rect rectArray[];
-    List<Rect> rectList = new ArrayList<>();
     int btnCounter;
     View view;
-    TextView floatingView;
     String buttonClickTextTest;
     Boolean viewIsSet = false;
 
@@ -82,21 +58,11 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         btnCounter = 1;
 
-        //Log.i("Accessibility", "onAccessibilityEvent");
-
-
         if(e.getPackageName()!=null){appname = e.getPackageName().toString();}
-
-        String logString = "";
-
-        AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
 
         if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
 
             showFloatingWindow("init text");
-
-
-
 
             switch (e.getEventType()) {
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
@@ -106,53 +72,14 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
                 }
 
                 case AccessibilityEvent.TYPE_VIEW_CLICKED: {
-                    //logString += "Text: " + nodeInfo.getText() + " \n " + " Content-Description: " + nodeInfo.getContentDescription() + "\n App Name: " + appname;
-                    //Log.v(LOG_TAG, logString);
-
                 }
 
                 case AccessibilityEvent.TYPE_VIEW_CONTEXT_CLICKED: {
-                    //  logString += "Context Text: " + nodeInfo.getText() + " " + " Content-Description: " + nodeInfo.getContentDescription() + " App Name: " + appname;
-                    //  Log.v(LOG_TAG, logString);
                 }
 
             }
 
-            //for (int i = 0 ; i < rectList.size() ; i++)
-            //  Log.d("value is" , rectList.get(i).toString());
-
         }
-
-        /*
-        String name;
-
-        if (event.getEventType() == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
-            if (event.getPackageName().toString().equals("com.whatsapp")){
-                StringBuilder message = new StringBuilder();
-                if (!event.getText().isEmpty()) {
-                    for (CharSequence subText : event.getText()) {
-                        message.append(subText);
-                    }
-                    if (message.toString().contains("Message from")){
-                        name=message.toString().substring(13);
-                    }
-                }
-            }
-        }
-
-
-        if (event.getEventType()==AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED){
-            if (source.getPackageName().equals("com.whatsapp")) {
-                AccessibilityNodeInfo currentNode=getRootInActiveWindow();
-                if (currentNode!=null && currentNode.getClassName().equals("android.widget.FrameLayout") && currentNode.getChild(2)!=null && currentNode.getChild(2).getClassName().equals("android.widget.TextView") && currentNode.getChild(2).getContentDescription().equals("Search")) {
-                    currentNode.getChild(2).performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                }
-            }
-        }
-
-         */
-
-
 
        /*==========  https://stackoverflow.com/questions/35842762/how-to-read-window-content-using-accessibilityservice-and-evoking-ui-using-dra ===========
        AccessibilityNodeInfo source = event.getSource();
@@ -182,32 +109,18 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
         Log.i("Service", "Connected");
         Toast.makeText(getApplicationContext(), "onServiceConnected", Toast.LENGTH_SHORT).show();
 
-
-/*        System.out.println("onServiceConnected");
-        AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-        info.eventTypes = AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED;
-        info.eventTypes=AccessibilityEvent.TYPES_ALL_MASK;
-        info.feedbackType = AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
-        info.notificationTimeout = 100;
-        info.packageNames = null;
-        setServiceInfo(info);*/
     }
 
 
     public void logNodeHierarchy(AccessibilityNodeInfo nodeInfo, int depth) {
 
         Rect rect = new Rect();
-
         String contentDescription;
         String viewText;
         String hintText;
-
-
+        String logString = "";
 
         if (nodeInfo == null) return;
-
-
-        String logString = "";
 
         for (int i = 0; i < depth; ++i) {
             logString += " ";
@@ -266,7 +179,6 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
         testBtn.setContentDescription("auto button");
         testBtn2.setText(String.valueOf(btnCounter));
         testBtn2.setContentDescription("auto button");
-        //testBtn.setBackgroundColor(Color.RED);
         testBtn.setWidth(150);
         testBtn.setHeight(150);
         testBtn.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -406,16 +318,9 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
 
         exportButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                //export();
-                //emailTest();
-                //intentTest();
                 String btnNumber = "Test Anzahl " + btnCounter;
-                //writeFileOnInternalStorage(context, "testFilename", "testFileBodyText");
                 writeToFile(btnNumber, context);
-                String testText = readFromFile(context);
-                Log.v(LOG_TAG, testText);
                 goToMainActivity();
-
             }
         });
 
@@ -440,77 +345,10 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
             out.write((data.toString()).getBytes());
             out.close();
 
-            /*
-            //exporting
-            Context context = getApplicationContext();
-            File filelocation = new File(getFilesDir(), "data.csv");
-            Uri path = FileProvider.getUriForFile(context, "com.example.accessibilityserviceappv2.fileprovider", filelocation);
-            Intent fileIntent = new Intent();
-            fileIntent.setAction(Intent.ACTION_SEND);
-            fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Data");
-            fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            fileIntent.putExtra(Intent.EXTRA_STREAM, path);
-            fileIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-            //fileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(Intent.createChooser(fileIntent, "Send Mail"));
-             */
         }
         catch (Exception e){
             e.printStackTrace();
         }
-
-
-    }
-
-    public void emailTest(){
-/*        Intent emailIntent = new Intent(Intent.ACTION_SEND);
-        //Intent emailIntent = new Intent(App.getContext(), App.class);
-        emailIntent.setType("text/html");
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"jon@example.com"}); // recipients
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Email subject");
-        emailIntent.putExtra(Intent.EXTRA_TEXT, "Email message text");
-        emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://path/to/email/attachment"));
-        emailIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        emailIntent.setComponent(new ComponentName(getApplicationContext().getPackageName(),  App.class.getName()));
-
-        startActivity(Intent.createChooser(emailIntent, "Send Email"));*/
-// You can also attach multiple items by passing an ArrayList of Uris
-
-    }
-
-    public void intentTest(){
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ComponentName cn = new ComponentName(this, MainActivity.class);
-        intent.setComponent(cn);
-        startActivity(intent);
-    }
-
-
-    public void writeFileOnInternalStorage(Context mcoContext, String sFileName, String sBody){
-        File dir = new File(mcoContext.getFilesDir(), "mydir");
-
-/*
-        try {
-            File myFile = new File("Your File name");
-            myFile.createNewFile();
-            FileOutputStream fOut = new FileOutputStream(myFile);
-            OutputStreamWriter myOutWriter =new OutputStreamWriter(fOut);
-            myOutWriter.append("testtext");
-            myOutWriter.close();
-            fOut.close();
-            Toast.makeText(getApplicationContext(), "Done writing SD 'mysdfile.txt", Toast.LENGTH_SHORT).show();
-
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(getApplicationContext(), e.getMessage(),Toast.LENGTH_SHORT).show();
-        }*/
-
 
 
     }

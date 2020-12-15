@@ -1,4 +1,4 @@
-package com.example.accessibilityserviceappv2;
+package com.example.accessibilityinspectorservice;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -11,7 +11,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+
+import com.example.accessibilityserviceappv2.R;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,8 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
         Button testButoon = (Button) findViewById(R.id.button25);
 
-        Context context = getApplicationContext();
-
         testButoon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -43,41 +42,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
     }
-
-
-
-    private String readFromFile(Context context) {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = context.openFileInput("mytesttext.txt");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append("\n").append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return ret;
-    }
-
 
     public void export(){
 
