@@ -3,6 +3,7 @@ package com.example.accessibilityserviceappv2;
 import android.accessibilityservice.AccessibilityService;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.net.Uri;
@@ -410,9 +411,10 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
                 //intentTest();
                 String btnNumber = "Test Anzahl " + btnCounter;
                 //writeFileOnInternalStorage(context, "testFilename", "testFileBodyText");
-                //writeToFile(btnNumber, context);
+                writeToFile(btnNumber, context);
                 String testText = readFromFile(context);
                 Log.v(LOG_TAG, testText);
+                goToMainActivity();
 
             }
         });
@@ -522,6 +524,21 @@ public class MyAccessibilityServiceV2 extends AccessibilityService {
         catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
+    }
+
+
+    private void goToMainActivity(){
+
+        //https://stackoverflow.com/questions/30800900/android-launch-another-app-from-activity
+
+        Context context = getApplicationContext();
+
+        PackageManager pm = context.getPackageManager();
+        Intent intent = pm.getLaunchIntentForPackage("com.example.accessibilityserviceappv2");
+        if (intent != null) {
+            context.startActivity(intent);
+        }
+
     }
 
     private String readFromFile(Context context) {
