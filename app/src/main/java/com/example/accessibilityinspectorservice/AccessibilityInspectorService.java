@@ -1,11 +1,16 @@
 package com.example.accessibilityinspectorservice;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Html;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -27,12 +32,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.view.ViewCompat;
+
 import com.example.accessibilityserviceappv2.R;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,26 +55,59 @@ public class AccessibilityInspectorService extends AccessibilityService {
     private static final String LOG_TAG = "MyActivity";
     public static String appname = "DummyApp";
     int btnCounter;
-    View view;
+    View floatingInfobox;
     String buttonClickTextTest;
     Boolean viewIsSet = false;
+    WindowManager wm;
+    List <CustomButton> accessButtonList;
+    Button exportButton;
+    ActivityInfo activityInfo;
+    ComponentName componentName;
 
 
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent e) {
 
+
+        if (e.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            if (e.getPackageName() != null && e.getClassName() != null) {
+                componentName = new ComponentName(
+                        e.getPackageName().toString(),
+                        e.getClassName().toString()
+                );
+
+                activityInfo = tryGetActivity(componentName);
+                boolean isActivity = activityInfo != null;
+                if (isActivity)
+                    Log.i("CurrentActivity", componentName.flattenToShortString());
+            }
+
+            if(e.getPackageName() != null){
+                if(!e.getPackageName().equals("com.example.emptytestapp") && !e.getPackageName().equals("com.example.accessibilityserviceappv2")) {
+                    System.out.println(" The Package " + e.getPackageName());
+                    System.out.println(" Remove Windows ");
+                    removeWindows();
+                }
+
+            }
+
+        }
+
         btnCounter = 1;
 
         if(e.getPackageName()!=null){appname = e.getPackageName().toString();}
 
+
         if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
 
-            showFloatingWindow("init text");
 
             switch (e.getEventType()) {
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
 
+                    wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+                    showFloatingWindow("init text");
+                    accessButtonList = new ArrayList();
                     logNodeHierarchy(getRootInActiveWindow(), 0);
                     addExportButton();
                 }
@@ -94,6 +135,14 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     }
 
+    private ActivityInfo tryGetActivity(ComponentName componentName) {
+        try {
+            return getPackageManager().getActivityInfo(componentName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
     @Override
     public void onInterrupt() {
 
@@ -108,6 +157,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         super.onServiceConnected();
         Log.i("Service", "Connected");
         Toast.makeText(getApplicationContext(), "onServiceConnected", Toast.LENGTH_SHORT).show();
+
 
     }
 
@@ -134,12 +184,11 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         Log.v(LOG_TAG, logString);
 
-        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         mLayout = new FrameLayout(this);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 
-        lp.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         lp.format = PixelFormat.TRANSLUCENT;
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
        // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -200,6 +249,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         wm.addView(testBtn, lp);
 
+        accessButtonList.add(testBtn);
+
         btnCounter++;
 
 
@@ -214,11 +265,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     public void showFloatingWindow(String initText){
         Context context = getApplicationContext();
-        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         lLayout = new LinearLayout(this);
 
         if(viewIsSet){
-            wm.removeView(view);
+            wm.removeView(floatingInfobox);
         }
 
         Button testButton = new Button(context);
@@ -228,28 +278,27 @@ public class AccessibilityInspectorService extends AccessibilityService {
         WindowManager.LayoutParams lp2 = new WindowManager.LayoutParams();
 
 
-        lp2.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        lp2.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         lp2.format = PixelFormat.TRANSLUCENT;
         lp2.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         lp2.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp2.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp2.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         lp2.gravity = Gravity.BOTTOM;
         lp2.x = 0;
         lp2.y = 0;
 
 
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        view = layoutInflater.inflate(R.layout.floatingwindow, null);
+        floatingInfobox = layoutInflater.inflate(R.layout.floatingwindow, null);
 
-        TextView item = (TextView) view.findViewById(R.id.textView2);
+        TextView item = (TextView) floatingInfobox.findViewById(R.id.textView2);
 
         item.setText(Html.fromHtml(initText));
 
         lLayout.setLayoutParams(llParameters);
 
-        view.setOnTouchListener(new View.OnTouchListener() {
+        floatingInfobox.setOnTouchListener(new View.OnTouchListener() {
 
             private WindowManager.LayoutParams updateParameters = lp2;
             int x, y;
@@ -273,7 +322,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     case MotionEvent.ACTION_MOVE:
                         updateParameters.y = (int) (y - (event.getRawY() - touchedY));
 
-                        wm.updateViewLayout(view, updateParameters);
+                        wm.updateViewLayout(floatingInfobox, updateParameters);
 
                     default:
 
@@ -285,7 +334,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         });
 
 
-        wm.addView(view,lp2);
+        wm.addView(floatingInfobox,lp2);
 
         viewIsSet = true;
 
@@ -297,15 +346,29 @@ public class AccessibilityInspectorService extends AccessibilityService {
         Context context = getApplicationContext();
 
 
-        Button exportButton = new Button(this);
+        exportButton = new Button(this);
         exportButton.setText("Export Button");
 
-        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
 
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        WindowManager.LayoutParams theparams = new WindowManager.LayoutParams();
 
-        lp.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        theparams = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+                        |WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                        |WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE ,
+                PixelFormat.TRANSLUCENT);
+
+
+        wm.addView(exportButton, theparams);
+
+
+
+        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION;
         lp.format = PixelFormat.TRANSLUCENT;
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -318,19 +381,19 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         exportButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
+                System.out.println("onclicker geklickt");
                 String btnNumber = "Test Anzahl " + btnCounter;
                 writeToFile(btnNumber, context);
+                removeWindows();
                 goToMainActivity();
             }
         });
-
-
-        wm.addView(exportButton, lp);
 
     }
 
 
     public void export(){
+
 
         //generate data
         StringBuilder data = new StringBuilder();
@@ -408,6 +471,141 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         return ret;
     }
+
+    private void removeWindows(){
+
+        System.out.println(" windows removed");
+
+
+
+        try {
+
+
+                for (CustomButton ab: accessButtonList) {
+
+                    if( ViewCompat.isAttachedToWindow(ab)){
+
+                        wm.removeView(ab);
+                    }
+
+                }
+
+                wm.removeView(floatingInfobox);
+
+                wm.removeView(exportButton);
+                viewIsSet=false;
+
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+    }
+
+    /*private void writeDataToCSV(){
+
+        final Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+
+            }
+        };
+        new Thread() {
+            public void run() {
+                try {
+
+                    FileWriter fw = new FileWriter(filename);
+
+                    Cursor cursor = db.selectAll();
+
+                    fw.append("No");
+                    fw.append(',');
+
+                    fw.append("code");
+                    fw.append(',');
+
+                    fw.append("nr");
+                    fw.append(',');
+
+                    fw.append("Orde");
+                    fw.append(',');
+
+                    fw.append("Da");
+                    fw.append(',');
+
+                    fw.append("Date");
+                    fw.append(',');
+
+                    fw.append("Leverancier");
+                    fw.append(',');
+
+                    fw.append("Baaln");
+                    fw.append(',');
+
+                    fw.append("asd");
+                    fw.append(',');
+
+                    fw.append("Kwaliteit");
+                    fw.append(',');
+
+                    fw.append("asd");
+                    fw.append(',');
+
+                    fw.append('\n');
+
+                    if (cursor.moveToFirst()) {
+                        do {
+                            fw.append(cursor.getString(0));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(1));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(2));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(3));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(4));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(5));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(6));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(7));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(8));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(9));
+                            fw.append(',');
+
+                            fw.append(cursor.getString(10));
+                            fw.append(',');
+
+                            fw.append('\n');
+
+                        } while (cursor.moveToNext());
+                    }
+                    if (cursor != null && !cursor.isClosed()) {
+                        cursor.close();
+                    }
+
+                    // fw.flush();
+                    fw.close();
+
+                } catch (Exception e) {
+                }
+                handler.sendEmptyMessage(0);
+            }
+        }.start();
+    }*/
+
 
 
 }
