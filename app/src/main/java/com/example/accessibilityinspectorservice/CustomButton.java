@@ -29,7 +29,6 @@ public class CustomButton extends androidx.appcompat.widget.AppCompatButton /*im
     Custom Button
      */
 
-    String contentDescription;
     Context context;
     String logString;
     private static final String LOG_TAG = "ButtonActivity";
@@ -37,23 +36,30 @@ public class CustomButton extends androidx.appcompat.widget.AppCompatButton /*im
     LayoutInflater layoutInflater;
     TextView testText;
 
-    String viewText;
-    String hintText;
     int btnCounter;
+    String viewText;
+    String contentDescription;
+    String hintText;
+    String labeledByElement;
+    String appName;
+
+
 
 
     public CustomButton(Context context) {
-        this(context, 0, null, null, null);
+        this(context, 0, null, null, null, null, null);
     }
 
-    public CustomButton(Context context, int btnCounter, String viewText, String contentDescription, String hintText) {
+    public CustomButton(Context context, int btnCounter, String viewText, String contentDescription, String hintText, String labeledByElement, String appName) {
         super(context);
         init();
         this.btnCounter = btnCounter;
         this.viewText = viewText;
         this.contentDescription = contentDescription;
         this.hintText = hintText;
+        this.labeledByElement = labeledByElement;
         this.context = context;
+        this.appName = appName;
     }
 
     private void init(){
@@ -110,6 +116,33 @@ public class CustomButton extends androidx.appcompat.widget.AppCompatButton /*im
         String InformationString = "<b>Element Nummer:</b> " + btnCounter + "<br><b>View Text: </b>" + viewText + "<br><b>Inhaltslabel:  </b>" + contentDescription + "<br><b>Hint: </b>" + hintText;
 
         return InformationString;
+    }
+
+    public String getElementNumber(){
+
+        return String.valueOf(btnCounter);
+
+    }
+    public String getElementText(){
+
+        return viewText;
+
+    }
+    public String getElementContentDescription(){
+
+        return contentDescription;
+    }
+    public String getElementHint(){
+        return hintText;
+
+    }
+    public String getLabeledByElement(){
+        return labeledByElement;
+    }
+
+
+    public String getAppName(){
+        return appName;
     }
 
 }

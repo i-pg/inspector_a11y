@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.ShapeDrawable;
@@ -45,7 +46,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class AccessibilityInspectorService extends AccessibilityService {
@@ -63,6 +67,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     Button exportButton;
     ActivityInfo activityInfo;
     ComponentName componentName;
+    String appName;
 
 
 
@@ -92,6 +97,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
             }
 
+
+
+
+
         }
 
         btnCounter = 1;
@@ -108,6 +117,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     wm = (WindowManager) getSystemService(WINDOW_SERVICE);
                     showFloatingWindow("init text");
                     accessButtonList = new ArrayList();
+
+                    appName =  e.getPackageName().toString();
                     logNodeHierarchy(getRootInActiveWindow(), 0);
                     addExportButton();
                 }
@@ -133,6 +144,12 @@ public class AccessibilityInspectorService extends AccessibilityService {
             Log.i("Required Text", requiredText);}
         ======================================================*/
 
+    }
+
+    public static String getApplicationName(Context context) {
+        ApplicationInfo applicationInfo = context.getApplicationInfo();
+        int stringId = applicationInfo.labelRes;
+        return stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : context.getString(stringId);
     }
 
     private ActivityInfo tryGetActivity(ComponentName componentName) {
@@ -168,6 +185,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         String contentDescription;
         String viewText;
         String hintText;
+        String labeledByElement;
         String logString = "";
 
         if (nodeInfo == null) return;
@@ -218,11 +236,22 @@ public class AccessibilityInspectorService extends AccessibilityService {
         if(nodeInfo.getHintText()!=null){
             hintText = nodeInfo.getHintText().toString();
         }
+
         else {
             hintText = "empty";
         }
 
-        CustomButton testBtn = new CustomButton(context, btnCounter, viewText, contentDescription, hintText);
+        if(nodeInfo.getLabeledBy()!=null){
+            labeledByElement = nodeInfo.getLabeledBy().getText().toString();
+        }
+
+        else {
+            labeledByElement = "not labeled";
+        }
+
+
+
+        CustomButton testBtn = new CustomButton(context, btnCounter, viewText, contentDescription, hintText, labeledByElement, appName);
         Button testBtn2 = new Button(context);
         testBtn.setText(String.valueOf(btnCounter));
         testBtn.setContentDescription("auto button");
@@ -416,16 +445,6 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     }
 
-    private void writeToFile(String data,Context context) {
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("mytesttext.txt", Context.MODE_PRIVATE));
-            outputStreamWriter.write(data);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
 
 
     private void goToMainActivity(){
@@ -501,6 +520,72 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
     }
+
+
+    private void writeToFile(String data,Context context) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("mytesttext.txt", Context.MODE_PRIVATE));
+
+            String csvData = dataPreparation();
+
+
+            outputStreamWriter.write(csvData);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+    private String dataPreparation(){
+
+        Date date = new Date();
+        long timestamp = date.getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy'T'HH:mm:ssZ");
+        String csvData;
+
+        String elementNumber;
+        String elementText;
+        String contentDescription;
+        String elementHintText;
+        String labeledByElement;
+        String currentTime;
+        String currentDate = sdf.format(timestamp);
+        String appName;
+
+
+        StringWriter sw = new StringWriter();
+
+        String csvHeader = "Element-Nr, Beschriftung, Inhalts-Label, Hint, Zugeh. Label, Uhrzeit, Applikation";
+
+        sw.append(csvHeader);
+
+        sw.append("\n\r");
+
+        for (CustomButton ab: accessButtonList) {
+
+            sw.append(ab.getElementNumber());
+            sw.append(",");
+            sw.append(ab.getElementText());
+            sw.append(",");
+            sw.append(ab.getElementContentDescription());
+            sw.append(",");
+            sw.append(ab.getElementHint());
+            sw.append(",");
+            sw.append(ab.getLabeledByElement());
+            sw.append(",");
+            sw.append(currentDate);
+            sw.append(",");
+            sw.append(ab.getAppName());
+            sw.append("\n");
+        }
+
+        csvData = sw.toString();
+
+        return csvData;
+
+    }
+
 
     /*private void writeDataToCSV(){
 
