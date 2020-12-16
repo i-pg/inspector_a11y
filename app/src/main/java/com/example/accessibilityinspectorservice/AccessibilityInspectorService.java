@@ -541,7 +541,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         Date date = new Date();
         long timestamp = date.getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy'T'HH:mm:ssZ");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy' 'HH:mm:ss");
         String csvData;
 
         String elementNumber;
@@ -556,7 +556,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         StringWriter sw = new StringWriter();
 
-        String csvHeader = "Element-Nr, Beschriftung, Inhalts-Label, Hint, Zugeh. Label, Uhrzeit, Applikation";
+        String csvHeader = "Element-Nr, Beschriftung, Inhalts-Label, Hint, Zugeh. Label, Datum/ Zeit, Applikation";
 
         sw.append(csvHeader);
 
