@@ -10,9 +10,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.content.SharedPreferences.Editor;
 
 import com.example.accessibilityserviceappv2.R;
 
@@ -24,6 +28,10 @@ public class AppListActivity extends ListActivity {
     private PackageManager packageManager = null;
     private List<ApplicationInfo> applist = null;
     private ApplicationAdapter listadaptor = null;
+    final String sharedPrefLabel = "appsToExamine";
+    private String selectedPackageName = "NoPackageSelected";
+    Editor prefEditor;
+    Button sendAppslistButton;
 
     int counter = 0;
 
@@ -32,20 +40,29 @@ public class AppListActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_list);
 
+        prefEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         packageManager = getPackageManager();
+        sendAppslistButton = (Button) findViewById(R.id.checkButton);
 
         new LoadApplications().execute();
+
+        sendAppslistButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                writeStringToSharedContent();
+            }
+        });
+
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
+        CheckBox cb = (CheckBox) v.findViewById(R.id.cb_app);
+        cb.setChecked(!cb.isChecked());
 
         ApplicationInfo app = applist.get(position);
 
-        Toast.makeText(AppListActivity.this, "thePosition " + app.toString(),
-                Toast.LENGTH_LONG).show();
         try {
             Intent intent = packageManager
                     .getLaunchIntentForPackage(app.packageName);
@@ -61,6 +78,16 @@ public class AppListActivity extends ListActivity {
             Toast.makeText(AppListActivity.this, e.getMessage(),
                     Toast.LENGTH_LONG).show();
         }
+
+        cb.setChecked(cb.isChecked());
+
+        if(selectedPackageName=="NoPackageSelected"){
+            selectedPackageName = app.packageName;
+        }
+        else {
+            selectedPackageName += app.packageName;
+        }
+        Toast.makeText(AppListActivity.this, app.packageName, Toast.LENGTH_SHORT).show();
     }
 
     private List<ApplicationInfo> checkForLaunchIntent(List<ApplicationInfo> list) {
@@ -116,5 +143,9 @@ public class AppListActivity extends ListActivity {
         }
     }
 
+    public void writeStringToSharedContent(){
+        prefEditor.putString(sharedPrefLabel, selectedPackageName);
+        prefEditor.apply();
+    }
 
 }

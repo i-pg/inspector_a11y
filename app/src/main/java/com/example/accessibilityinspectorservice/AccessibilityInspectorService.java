@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -12,6 +13,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -68,12 +70,15 @@ public class AccessibilityInspectorService extends AccessibilityService {
     ActivityInfo activityInfo;
     ComponentName componentName;
     String appName;
+    String myStrValue;
+    final String sharedPrefLabel = "appsToExamine";
 
 
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent e) {
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         if (e.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (e.getPackageName() != null && e.getClassName() != null) {
@@ -106,6 +111,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
         btnCounter = 1;
 
         if(e.getPackageName()!=null){appname = e.getPackageName().toString();}
+
+        myStrValue = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
+        System.out.println("Shared Pref " + myStrValue);
 
 
         if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
@@ -585,112 +593,5 @@ public class AccessibilityInspectorService extends AccessibilityService {
         return csvData;
 
     }
-
-
-    /*private void writeDataToCSV(){
-
-        final Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-
-            }
-        };
-        new Thread() {
-            public void run() {
-                try {
-
-                    FileWriter fw = new FileWriter(filename);
-
-                    Cursor cursor = db.selectAll();
-
-                    fw.append("No");
-                    fw.append(',');
-
-                    fw.append("code");
-                    fw.append(',');
-
-                    fw.append("nr");
-                    fw.append(',');
-
-                    fw.append("Orde");
-                    fw.append(',');
-
-                    fw.append("Da");
-                    fw.append(',');
-
-                    fw.append("Date");
-                    fw.append(',');
-
-                    fw.append("Leverancier");
-                    fw.append(',');
-
-                    fw.append("Baaln");
-                    fw.append(',');
-
-                    fw.append("asd");
-                    fw.append(',');
-
-                    fw.append("Kwaliteit");
-                    fw.append(',');
-
-                    fw.append("asd");
-                    fw.append(',');
-
-                    fw.append('\n');
-
-                    if (cursor.moveToFirst()) {
-                        do {
-                            fw.append(cursor.getString(0));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(1));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(2));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(3));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(4));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(5));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(6));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(7));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(8));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(9));
-                            fw.append(',');
-
-                            fw.append(cursor.getString(10));
-                            fw.append(',');
-
-                            fw.append('\n');
-
-                        } while (cursor.moveToNext());
-                    }
-                    if (cursor != null && !cursor.isClosed()) {
-                        cursor.close();
-                    }
-
-                    // fw.flush();
-                    fw.close();
-
-                } catch (Exception e) {
-                }
-                handler.sendEmptyMessage(0);
-            }
-        }.start();
-    }*/
-
-
 
 }
