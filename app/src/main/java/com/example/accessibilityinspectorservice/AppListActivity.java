@@ -1,147 +1,107 @@
+// Nachlesen: https://stackoverflow.com/questions/18162931/get-selected-item-using-checkbox-in-listview
 package com.example.accessibilityinspectorservice;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.ListActivity;
-import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.content.SharedPreferences.Editor;
-
 import com.example.accessibilityserviceappv2.R;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import static java.lang.String.valueOf;
 
 public class AppListActivity extends ListActivity {
 
-    private PackageManager packageManager = null;
-    private List<ApplicationInfo> applist = null;
-    private ApplicationAdapter listadaptor = null;
+    ApplicationAdapter adapter ;
+    AppInfo app_info[] ;
+    int counter;
     final String sharedPrefLabel = "appsToExamine";
     private String selectedPackageName = "NoPackageSelected";
     Editor prefEditor;
     Button sendAppslistButton;
+    String resultString;
 
-    int counter = 0;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_list);
 
         prefEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        packageManager = getPackageManager();
         sendAppslistButton = (Button) findViewById(R.id.checkButton);
 
-        new LoadApplications().execute();
+        final ListView listApplication = (ListView)findViewById(R.id.listView);
+        sendAppslistButton= (Button) findViewById(R.id.checkButton);
+        sendAppslistButton.setOnClickListener(new View.OnClickListener()
+        {
 
-        sendAppslistButton.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-                writeStringToSharedContent();
-            }
-        });
+            @Override
+            public void onClick(View v) {
 
-    }
+                StringBuilder result = new StringBuilder();
+                for(int i=0;i<counter;i++)
+                {
+                    if(adapter.mCheckStates.get(i))
+                    {
 
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-
-        CheckBox cb = (CheckBox) v.findViewById(R.id.cb_app);
-        cb.setChecked(!cb.isChecked());
-
-        ApplicationInfo app = applist.get(position);
-
-        try {
-            Intent intent = packageManager
-                    .getLaunchIntentForPackage(app.packageName);
-
-            if (null != intent) {
-                //startActivity(intent);
-                System.out.println("Package: " + app.packageName);
-            }
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(AppListActivity.this, e.getMessage(),
-                    Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            Toast.makeText(AppListActivity.this, e.getMessage(),
-                    Toast.LENGTH_LONG).show();
-        }
-
-        cb.setChecked(cb.isChecked());
-
-        selectedPackageName = app.packageName;
-        Toast.makeText(AppListActivity.this, app.packageName, Toast.LENGTH_SHORT).show();
-    }
-
-    private List<ApplicationInfo> checkForLaunchIntent(List<ApplicationInfo> list) {
-        ArrayList<ApplicationInfo> applist = new ArrayList<ApplicationInfo>();
-        for (ApplicationInfo info : list) {
-            try {
-                if (null != packageManager.getLaunchIntentForPackage(info.packageName)) {
-                    applist.add(info);
+                        result.append(app_info[i].applicationName);
+                        result.append(" ; ");
+                    }
 
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+
+                resultString = result.toString();
+
+                writeStringToSharedContent(resultString);
+                Toast.makeText(AppListActivity.this, result, Toast.LENGTH_SHORT).show();
             }
+
+        });
+
+
+        ApplicationInfo applicationInfo = getApplicationInfo();
+        PackageManager pm = getPackageManager();
+        List<ApplicationInfo> pInfo = new ArrayList<ApplicationInfo>();
+        pInfo.addAll(pm.getInstalledApplications(PackageManager.GET_META_DATA));
+
+
+        //Sortieren der gefundenen Applications
+        Collections.sort(pInfo, new ApplicationInfo.DisplayNameComparator(pm));
+
+
+        app_info = new AppInfo[pInfo.size()];
+
+        counter = 0;
+        for(ApplicationInfo item: pInfo){
+            try{
+
+                applicationInfo = pm.getApplicationInfo(item.packageName, 0);
+
+                app_info[counter] = new AppInfo(pm.getApplicationIcon(applicationInfo),
+                        valueOf(pm.getApplicationLabel(applicationInfo)));
+
+            }
+            catch(Exception e){
+                System.out.println(e.getMessage());
+            }
+
+            counter++;
         }
 
-        return applist;
+        adapter = new ApplicationAdapter(this, R.layout.row, app_info);
+        listApplication.setAdapter(adapter);
+
     }
 
-    private class LoadApplications extends AsyncTask<Void, Void, Void> {
-        private ProgressDialog progress = null;
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            applist = checkForLaunchIntent(packageManager.getInstalledApplications(PackageManager.GET_META_DATA));
-            listadaptor = new ApplicationAdapter(AppListActivity.this,
-                    R.layout.row, applist);
-
-            return null;
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            setListAdapter(listadaptor);
-            progress.dismiss();
-            super.onPostExecute(result);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            progress = ProgressDialog.show(AppListActivity.this, null,
-                    "Loading application info...");
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-        }
-    }
-
-    public void writeStringToSharedContent(){
-        prefEditor.putString(sharedPrefLabel, selectedPackageName);
+    public void writeStringToSharedContent(String resultString){
+        prefEditor.putString(sharedPrefLabel, resultString);
         prefEditor.apply();
     }
-
 }

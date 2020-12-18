@@ -3,9 +3,11 @@ package com.example.accessibilityinspectorservice;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,71 +20,80 @@ import android.widget.Toast;
 
 import com.example.accessibilityserviceappv2.R;
 
-public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
-    private List<ApplicationInfo> appsList = null;
-    private Context context;
-    private PackageManager packageManager;
-    private ArrayList<Boolean> checkList = new ArrayList<Boolean>();
-    private TextView packageName;
+public class ApplicationAdapter extends ArrayAdapter<AppInfo> implements CompoundButton.OnCheckedChangeListener
+    {  SparseBooleanArray mCheckStates;
 
-    public ApplicationAdapter(Context context, int textViewResourceId,
-                              List<ApplicationInfo> appsList) {
-        super(context, textViewResourceId, appsList);
-        this.context = context;
-        this.appsList = appsList;
-        packageManager = context.getPackageManager();
+        Context context;
+        int layoutResourceId;
+        AppInfo  data[] = null;
 
-        for (int i = 0; i < appsList.size(); i++) {
-            checkList.add(false);
-        }
-    }
-
-    @Override
-    public int getCount() {
-        return ((null != appsList) ? appsList.size() : 0);
-    }
-
-    @Override
-    public ApplicationInfo getItem(int position) {
-        return ((null != appsList) ? appsList.get(position) : null);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (null == view) {
-            LayoutInflater layoutInflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = layoutInflater.inflate(R.layout.row, null);
+        public ApplicationAdapter(Context context, int layoutResourceId, AppInfo[] data){
+            super(context, layoutResourceId,data);
+            this.layoutResourceId = layoutResourceId;
+            this.context = context;
+            this.data = data;
+            mCheckStates = new SparseBooleanArray(data.length);
         }
 
-        ApplicationInfo data = appsList.get(position);
-        if (null != data) {
-            TextView appName = (TextView) view.findViewById(R.id.app_name);
-            packageName = (TextView) view.findViewById(R.id.app_paackage);
-            ImageView iconview = (ImageView) view.findViewById(R.id.app_icon);
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent){
 
-            CheckBox checkBox = (CheckBox) view.findViewById(R.id.cb_app);
-            checkBox.setTag(Integer.valueOf(position)); // set the tag so we can identify the correct row in the listener
-            checkBox.setChecked(checkList.get(position)); // set the status as we stored it
-            checkBox.setOnCheckedChangeListener(mListener);
+            View row = convertView;
+            AppInfoHolder holder= null;
 
-            appName.setText(data.loadLabel(packageManager));
-            packageName.setText(data.packageName);
-            iconview.setImageDrawable(data.loadIcon(packageManager));
+            if (row == null){
+
+                LayoutInflater inflater = ((Activity)context).getLayoutInflater();
+                row = inflater.inflate(layoutResourceId, parent, false);
+
+                holder = new AppInfoHolder();
+
+                holder.imgIcon = (ImageView) row.findViewById(R.id.app_icon);
+                holder.txtTitle = (TextView) row.findViewById(R.id.app_name);
+                holder.chkSelect = (CheckBox) row.findViewById(R.id.cb_app);
+
+                row.setTag(holder);
+
+            }
+            else{
+                holder = (AppInfoHolder)row.getTag();
+            }
+
+
+            AppInfo appinfo = data[position];
+            holder.txtTitle.setText(appinfo.applicationName);
+            holder.imgIcon.setImageDrawable(appinfo.icon);
+            // holder.chkSelect.setChecked(true);
+            holder.chkSelect.setTag(position);
+            holder.chkSelect.setChecked(mCheckStates.get(position, false));
+            holder.chkSelect.setOnCheckedChangeListener(this);
+            return row;
+
         }
-        return view;
+        public boolean isChecked(int position) {
+            return mCheckStates.get(position, false);
+        }
+
+        public void setChecked(int position, boolean isChecked) {
+            mCheckStates.put(position, isChecked);
+
+        }
+
+        public void toggle(int position) {
+            setChecked(position, !isChecked(position));
+
+        }
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView,
+                                     boolean isChecked) {
+
+            mCheckStates.put((Integer) buttonView.getTag(), isChecked);
+
+        }
+        static class AppInfoHolder
+        {
+            ImageView imgIcon;
+            TextView txtTitle;
+            CheckBox chkSelect;
+        }
     }
-
-    CompoundButton.OnCheckedChangeListener mListener = new CompoundButton.OnCheckedChangeListener() {
-
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            checkList.set((Integer)buttonView.getTag(),isChecked); // get the tag so we know the row and store the status
-        }
-    };
-}
