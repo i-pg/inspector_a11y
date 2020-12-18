@@ -95,6 +95,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
             if(e.getPackageName() != null){
                 if(!e.getPackageName().equals("com.example.emptytestapp") && !e.getPackageName().equals("com.example.accessibilityserviceappv2")) {
+        //ToDo:      if(!e.getPackageName().equals("com.example.emptytestapp") && !e.getPackageName().equals("com.example.accessibilityserviceappv2")) {
                     System.out.println(" The Package " + e.getPackageName());
                     System.out.println(" Remove Windows ");
                     removeWindows();
@@ -115,8 +116,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
         myStrValue = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
         System.out.println("Shared Pref " + myStrValue);
 
-
         if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
+        //if (e.getPackageName()!=null && e.getPackageName().toString().equals(myStrValue)) {
+        //if (e.getPackageName()!=null && myStrValue.contains(e.getPackageName().toString())) {
 
 
             switch (e.getEventType()) {
@@ -218,12 +220,15 @@ public class AccessibilityInspectorService extends AccessibilityService {
         lp.format = PixelFormat.TRANSLUCENT;
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
        // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.width = rect.width();
+        //lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         //lp.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        lp.gravity = Gravity.TOP | Gravity.RIGHT;
-        lp.x = rect.centerX();
-        lp.y = rect.centerY();
+        lp.gravity = Gravity.TOP | Gravity.START;
+        lp.x = rect.left;
+        lp.y = rect.top - 50;
+        lp.verticalMargin = 0;
+        lp.horizontalMargin = 0;
 
 
 
@@ -260,13 +265,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
 
         CustomButton testBtn = new CustomButton(context, btnCounter, viewText, contentDescription, hintText, labeledByElement, appName);
-        Button testBtn2 = new Button(context);
         testBtn.setText(String.valueOf(btnCounter));
         testBtn.setContentDescription("auto button");
-        testBtn2.setText(String.valueOf(btnCounter));
-        testBtn2.setContentDescription("auto button");
-        testBtn.setWidth(150);
-        testBtn.setHeight(150);
         testBtn.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         testBtn.setPadding(20,30,20,20);
 
@@ -400,6 +400,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                         |WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE ,
                 PixelFormat.TRANSLUCENT);
 
+        theparams.gravity = Gravity.TOP | Gravity.END;
 
         wm.addView(exportButton, theparams);
 

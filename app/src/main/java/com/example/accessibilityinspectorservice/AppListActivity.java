@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -81,12 +82,7 @@ public class AppListActivity extends ListActivity {
 
         cb.setChecked(cb.isChecked());
 
-        if(selectedPackageName=="NoPackageSelected"){
-            selectedPackageName = app.packageName;
-        }
-        else {
-            selectedPackageName += app.packageName;
-        }
+        selectedPackageName = app.packageName;
         Toast.makeText(AppListActivity.this, app.packageName, Toast.LENGTH_SHORT).show();
     }
 
