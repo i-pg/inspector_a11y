@@ -49,8 +49,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -79,6 +81,16 @@ public class AccessibilityInspectorService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent e) {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        myStrValue = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
+        System.out.println("Shared Pref " + myStrValue);
+        String all_vals = myStrValue;
+        List<String> list = Arrays.asList(all_vals.split(";"));
+
+        if(e.getPackageName()!=null){appName = e.getPackageName().toString();}
+
+        System.out.println("Appname: " + appName);
+        System.out.println("List: " + list.toString());
+
 
         if (e.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (e.getPackageName() != null && e.getClassName() != null) {
@@ -93,9 +105,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     Log.i("CurrentActivity", componentName.flattenToShortString());
             }
 
+
             if(e.getPackageName() != null){
-                if(!e.getPackageName().equals("com.example.emptytestapp") && !e.getPackageName().equals("com.example.accessibilityserviceappv2")) {
-        //ToDo:      if(!e.getPackageName().equals("com.example.emptytestapp") && !e.getPackageName().equals("com.example.accessibilityserviceappv2")) {
+               // if(!e.getPackageName().equals("com.example.emptytestapp") && !e.getPackageName().equals("com.example.accessibilityserviceappv2")) {
+                if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !list.contains(e.getPackageName().toString())) {
                     System.out.println(" The Package " + e.getPackageName());
                     System.out.println(" Remove Windows ");
                     removeWindows();
@@ -103,21 +116,25 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
             }
 
-
-
-
-
         }
 
         btnCounter = 1;
 
-        if(e.getPackageName()!=null){appname = e.getPackageName().toString();}
+        String testVar = "blub";
 
-        myStrValue = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
-        System.out.println("Shared Pref " + myStrValue);
+        if(e.getPackageName() != null){testVar = e.getPackageName().toString();
+
+            System.out.println("package jetzt richtig: " + testVar);
+        }
+
 
         if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
-        //if (e.getPackageName()!=null && e.getPackageName().toString().equals(myStrValue)) {
+        // Funktioniert nicht
+        // if (e.getPackageName()!=null && list.contains(testVar)) {
+
+
+
+            //if (e.getPackageName()!=null && e.getPackageName().toString().equals(myStrValue)) {
         //if (e.getPackageName()!=null && myStrValue.contains(e.getPackageName().toString())) {
 
 

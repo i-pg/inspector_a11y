@@ -51,7 +51,7 @@ public class AppListActivity extends ListActivity {
                     if(adapter.mCheckStates.get(i))
                     {
 
-                        result.append(app_info[i].applicationName);
+                        result.append(app_info[i].packageName);
                         result.append(" ; ");
                     }
 
@@ -84,8 +84,10 @@ public class AppListActivity extends ListActivity {
 
                 applicationInfo = pm.getApplicationInfo(item.packageName, 0);
 
+                String packageInfo = item.packageName;
+
                 app_info[counter] = new AppInfo(pm.getApplicationIcon(applicationInfo),
-                        valueOf(pm.getApplicationLabel(applicationInfo)));
+                        valueOf(pm.getApplicationLabel(applicationInfo)), packageInfo);
 
             }
             catch(Exception e){

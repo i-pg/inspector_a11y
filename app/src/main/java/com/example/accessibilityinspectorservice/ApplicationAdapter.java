@@ -50,6 +50,7 @@ public class ApplicationAdapter extends ArrayAdapter<AppInfo> implements Compoun
 
                 holder.imgIcon = (ImageView) row.findViewById(R.id.app_icon);
                 holder.txtTitle = (TextView) row.findViewById(R.id.app_name);
+                holder.packageName = (TextView) row.findViewById(R.id.app_paackage);
                 holder.chkSelect = (CheckBox) row.findViewById(R.id.cb_app);
 
                 row.setTag(holder);
@@ -63,6 +64,7 @@ public class ApplicationAdapter extends ArrayAdapter<AppInfo> implements Compoun
             AppInfo appinfo = data[position];
             holder.txtTitle.setText(appinfo.applicationName);
             holder.imgIcon.setImageDrawable(appinfo.icon);
+            holder.packageName.setText(appinfo.packageName);
             // holder.chkSelect.setChecked(true);
             holder.chkSelect.setTag(position);
             holder.chkSelect.setChecked(mCheckStates.get(position, false));
@@ -94,6 +96,7 @@ public class ApplicationAdapter extends ArrayAdapter<AppInfo> implements Compoun
         {
             ImageView imgIcon;
             TextView txtTitle;
+            TextView packageName;
             CheckBox chkSelect;
         }
     }
