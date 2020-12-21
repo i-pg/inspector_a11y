@@ -22,7 +22,7 @@ public class AppListActivity extends ListActivity {
     ApplicationAdapter adapter ;
     AppInfo app_info[] ;
     int counter;
-    final String sharedPrefLabel = "appsToExamine";
+    final String sharedPrefLabel = "appsToInspect";
     private String selectedPackageName = "NoPackageSelected";
     Editor prefEditor;
     Button sendAppslistButton;

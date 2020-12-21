@@ -73,7 +73,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     ComponentName componentName;
     String appName;
     String myStrValue;
-    final String sharedPrefLabel = "appsToExamine";
+    final String sharedPrefLabel = "appsToInspect";
 
 
 
@@ -84,93 +84,71 @@ public class AccessibilityInspectorService extends AccessibilityService {
         myStrValue = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
         System.out.println("Shared Pref " + myStrValue);
         String all_vals = myStrValue;
-        List<String> list = Arrays.asList(all_vals.split(";"));
+        List<String> appsWhitelist = Arrays.asList(all_vals.split(";"));
 
         if(e.getPackageName()!=null){appName = e.getPackageName().toString();}
 
         System.out.println("Appname: " + appName);
-        System.out.println("List: " + list.toString());
+        System.out.println("List: " + appsWhitelist.toString());
+
+
+
 
 
         if (e.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (e.getPackageName() != null && e.getClassName() != null) {
-                componentName = new ComponentName(
-                        e.getPackageName().toString(),
-                        e.getClassName().toString()
-                );
 
-                activityInfo = tryGetActivity(componentName);
-                boolean isActivity = activityInfo != null;
-                if (isActivity)
-                    Log.i("CurrentActivity", componentName.flattenToShortString());
-            }
-
-
-            if(e.getPackageName() != null){
-               // if(!e.getPackageName().equals("com.example.emptytestapp") && !e.getPackageName().equals("com.example.accessibilityserviceappv2")) {
-                if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !list.contains(e.getPackageName().toString())) {
-                    System.out.println(" The Package " + e.getPackageName());
-                    System.out.println(" Remove Windows ");
-                    removeWindows();
-                }
-
-            }
 
         }
+
+
+
+
+
+
+
+
 
         btnCounter = 1;
+        String currentPackageName = "init text";
 
-        String testVar = "blub";
-
-        if(e.getPackageName() != null){testVar = e.getPackageName().toString();
-
-            System.out.println("package jetzt richtig: " + testVar);
+        if(e.getPackageName() != null){
+            currentPackageName = e.getPackageName().toString();
         }
 
 
-        //if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
-        // Funktioniert nicht
-        if (e.getPackageName()!=null && list.contains(testVar)) {
-
-            System.out.println("Liste " + list.toString());
-
-
-            //if (e.getPackageName()!=null && e.getPackageName().toString().equals(myStrValue)) {
-        //if (e.getPackageName()!=null && myStrValue.contains(e.getPackageName().toString())) {
+        if (e.getPackageName()!=null) {
 
 
             switch (e.getEventType()) {
-                case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
+                case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
 
-                    wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-                    showFloatingWindow("init text");
-                    accessButtonList = new ArrayList();
+                    if(appsWhitelist.contains(currentPackageName)){
+                        wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+                        showFloatingWindow("Klicke auf eines der Elemente");
+                        accessButtonList = new ArrayList();
 
-                    appName =  e.getPackageName().toString();
-                    logNodeHierarchy(getRootInActiveWindow(), 0);
-                    addExportButton();
+                        appName =  e.getPackageName().toString();
+                        logNodeHierarchy(getRootInActiveWindow(), 0);
+                        addExportButton();
+                    }
+
+                    else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
+                        removeWindows();
+                    }
+
+                }
+
+                case AccessibilityEvent.TYPE_VIEW_SCROLLED:{
+                    //wm.updateViewLayout();
                 }
 
                 case AccessibilityEvent.TYPE_VIEW_CLICKED: {
                 }
 
-                case AccessibilityEvent.TYPE_VIEW_CONTEXT_CLICKED: {
-                }
 
             }
 
         }
-
-       /*==========  https://stackoverflow.com/questions/35842762/how-to-read-window-content-using-accessibilityservice-and-evoking-ui-using-dra ===========
-       AccessibilityNodeInfo source = event.getSource();
-        if (source == null) {return;}
-
-        List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId = source.findAccessibilityNodeInfosByViewId("YOUR PACKAGE NAME:id/RESOURCE ID FROM WHERE YOU WANT DATA");
-        if (findAccessibilityNodeInfosByViewId.size() > 0) {
-            AccessibilityNodeInfo parent = (AccessibilityNodeInfo) findAccessibilityNodeInfosByViewId.get(0);
-            String requiredText = parent.getText().toString();
-            Log.i("Required Text", requiredText);}
-        ======================================================*/
 
     }
 
@@ -234,9 +212,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 
-        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        lp.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
         lp.format = PixelFormat.TRANSLUCENT;
-        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
        // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         lp.width = rect.width();
         //lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
@@ -244,7 +222,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         //lp.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         lp.gravity = Gravity.TOP | Gravity.START;
         lp.x = rect.left;
-        lp.y = rect.top - 50;
+        lp.y = rect.top - 70;
         lp.verticalMargin = 0;
         lp.horizontalMargin = 0;
 
@@ -333,7 +311,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         WindowManager.LayoutParams lp2 = new WindowManager.LayoutParams();
 
 
-        lp2.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        lp2.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
         lp2.format = PixelFormat.TRANSLUCENT;
         lp2.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -365,11 +343,6 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 switch (event.getAction()){
                     case MotionEvent.ACTION_DOWN:
                         y = updateParameters.y;
-
-
-                        Toast.makeText(getApplicationContext(), "onTouch", Toast.LENGTH_SHORT).show();
-
-
                         touchedY = event.getRawY();
 
                         break;
@@ -445,33 +418,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
             }
         });
 
-    }
-
-
-    public void export(){
-
-
-        //generate data
-        StringBuilder data = new StringBuilder();
-        data.append("Time, Distance");
-        for(int i = 0; i<5; i++ ){
-            data.append("\n"+String.valueOf(i)+","+String.valueOf(i*i));
-        }
-
-        try{
-            //saving the file into device
-            FileOutputStream out = openFileOutput("data.csv", Context.MODE_PRIVATE);
-            out.write((data.toString()).getBytes());
-            out.close();
-
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-
 
     }
-
 
 
     private void goToMainActivity(){
@@ -488,35 +436,6 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     }
 
-    private String readFromFile(Context context) {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = context.openFileInput("mytesttext.txt");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append("\n").append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return ret;
-    }
 
     private void removeWindows(){
 
@@ -570,16 +489,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         long timestamp = date.getTime();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy' 'HH:mm:ss");
         String csvData;
-
-        String elementNumber;
-        String elementText;
-        String contentDescription;
-        String elementHintText;
-        String labeledByElement;
-        String currentTime;
         String currentDate = sdf.format(timestamp);
-        String appName;
-
 
         StringWriter sw = new StringWriter();
 
