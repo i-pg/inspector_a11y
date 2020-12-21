@@ -66,7 +66,7 @@ public class CustomButton extends androidx.appcompat.widget.AppCompatButton /*im
         if(context != null){
             layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = layoutInflater.inflate(R.layout.floatingwindow, null, false);
-            testText = findViewById(R.id.textView2);
+            testText = findViewById(R.id.infoWindowText);
         }
         else {
             Log.v(LOG_TAG, "context empty");

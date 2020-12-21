@@ -50,6 +50,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,65 +59,40 @@ import java.util.List;
 
 public class AccessibilityInspectorService extends AccessibilityService {
 
-    FrameLayout mLayout;
     LinearLayout lLayout;
-    private static final String LOG_TAG = "MyActivity";
-    public static String appname = "DummyApp";
-    int btnCounter;
+    private static final String LOG_TAG = "Accessibility Inspector Service";
+    public static String appname = "not set";
+    int nodeCounter;
     View floatingInfobox;
-    String buttonClickTextTest;
-    Boolean viewIsSet = false;
-    WindowManager wm;
-    List <CustomButton> accessButtonList;
-    Button exportButton;
-    ActivityInfo activityInfo;
-    ComponentName componentName;
-    String appName;
-    String myStrValue;
-    final String sharedPrefLabel = "appsToInspect";
+    String viewElementDataString;
 
+    Boolean floatingInfoBoxIsSet = false;
+    WindowManager wm;
+
+    // Liste in der alle viewElementInformationButtons gespeichert werden
+    List <CustomButton> nodeButtonsList;
+    Button shareButton;
+    String appName;
+    String sharedPrefsHolder;
+    final String sharedPrefLabel = "appsToInspect";
 
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent e) {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        myStrValue = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
-        System.out.println("Shared Pref " + myStrValue);
-        String all_vals = myStrValue;
-        List<String> appsWhitelist = Arrays.asList(all_vals.split(";"));
-
-        if(e.getPackageName()!=null){appName = e.getPackageName().toString();}
-
-        System.out.println("Appname: " + appName);
-        System.out.println("List: " + appsWhitelist.toString());
+        sharedPrefsHolder = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
+        String splitHelperString = sharedPrefsHolder;
+        List<String> appsWhitelist = Arrays.asList(splitHelperString.split(";"));
 
 
-
-
-
-        if (e.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-
-
-        }
-
-
-
-
-
-
-
-
-
-        btnCounter = 1;
+        nodeCounter = 1;
         String currentPackageName = "init text";
-
-        if(e.getPackageName() != null){
-            currentPackageName = e.getPackageName().toString();
-        }
 
 
         if (e.getPackageName()!=null) {
+
+            currentPackageName = e.getPackageName().toString();
 
 
             switch (e.getEventType()) {
@@ -124,12 +100,11 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
                     if(appsWhitelist.contains(currentPackageName)){
                         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-                        showFloatingWindow("Klicke auf eines der Elemente");
-                        accessButtonList = new ArrayList();
-
+                        showFloatingInfoWindow("Klicke auf eines der Elemente");
+                        nodeButtonsList = new ArrayList();
                         appName =  e.getPackageName().toString();
                         logNodeHierarchy(getRootInActiveWindow(), 0);
-                        addExportButton();
+                        addShareButton();
                     }
 
                     else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
@@ -139,49 +114,25 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 }
 
                 case AccessibilityEvent.TYPE_VIEW_SCROLLED:{
-                    //wm.updateViewLayout();
+                    //ToDo: wm.updateViewLayout();
                 }
-
-                case AccessibilityEvent.TYPE_VIEW_CLICKED: {
-                }
-
-
             }
 
         }
 
     }
 
-    public static String getApplicationName(Context context) {
-        ApplicationInfo applicationInfo = context.getApplicationInfo();
-        int stringId = applicationInfo.labelRes;
-        return stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : context.getString(stringId);
-    }
-
-    private ActivityInfo tryGetActivity(ComponentName componentName) {
-        try {
-            return getPackageManager().getActivityInfo(componentName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
-        }
-    }
 
     @Override
     public void onInterrupt() {
-
         Log.i("Interrupt", "Interrupt");
-        Toast.makeText(getApplicationContext(), "onInterrupt", Toast.LENGTH_SHORT).show();
     }
 
 
     @Override
     protected void onServiceConnected() {
-
         super.onServiceConnected();
         Log.i("Service", "Connected");
-        Toast.makeText(getApplicationContext(), "onServiceConnected", Toast.LENGTH_SHORT).show();
-
-
     }
 
 
@@ -200,46 +151,36 @@ public class AccessibilityInspectorService extends AccessibilityService {
             logString += " ";
         }
 
+        //Koordinaten der Node:
         nodeInfo.getBoundsInScreen(rect);
-
         Context context = getApplicationContext();
 
-        logString += "\nElement: " + btnCounter + "\n Text: " + nodeInfo.getText() + "\n" + " Content-Description: " + nodeInfo.getContentDescription() + "\n App Name: " + appname + "\n Koordinaten " +rect + "\n Hint " + nodeInfo.getHintText() + "\n Labeled By " + nodeInfo.getLabeledBy();
-
+        logString += "\nElement: " + nodeCounter + "\n Text: " + nodeInfo.getText() + "\n" + " Content-Description: " + nodeInfo.getContentDescription() + "\n App Name: " + appname + "\n Koordinaten " +rect + "\n Hint " + nodeInfo.getHintText() + "\n Labeled By " + nodeInfo.getLabeledBy();
         Log.v(LOG_TAG, logString);
 
-        mLayout = new FrameLayout(this);
+        WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
 
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-
-        lp.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-        lp.format = PixelFormat.TRANSLUCENT;
-        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
-       // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        lp.width = rect.width();
-        //lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        //lp.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        lp.gravity = Gravity.TOP | Gravity.START;
-        lp.x = rect.left;
-        lp.y = rect.top - 70;
-        lp.verticalMargin = 0;
-        lp.horizontalMargin = 0;
-
-
+        nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
+        nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        nodeLayoutParams.width = rect.width();
+        nodeLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
+        nodeLayoutParams.x = rect.left;
+        nodeLayoutParams.y = rect.top - 70;
 
         if(nodeInfo.getText()!=null){
             viewText = nodeInfo.getText().toString();
         }
         else {
-            viewText = "empty";
+            viewText = "keiner";
         }
 
         if(nodeInfo.getContentDescription()!=null){
             contentDescription = nodeInfo.getContentDescription().toString();
         }
         else {
-            contentDescription = "empty";
+            contentDescription = "keines";
         }
 
         if(nodeInfo.getHintText()!=null){
@@ -247,7 +188,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
         else {
-            hintText = "empty";
+            hintText = "keiner";
         }
 
         if(nodeInfo.getLabeledBy()!=null){
@@ -255,87 +196,72 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
         else {
-            labeledByElement = "not labeled";
+            labeledByElement = "kein Label";
         }
 
+        CustomButton nodeInfoButton = new CustomButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName);
+        nodeInfoButton.setText(String.valueOf(nodeCounter));
+        //ToDo: accessibility Richtlinien auch bei Service:
+        //nodeInfoButton.setContentDescription("auto button");
+        nodeInfoButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        nodeInfoButton.setPadding(20,30,20,20);
 
+        ShapeDrawable nodeInfoButtonShape = new ShapeDrawable();
+        nodeInfoButtonShape.setShape(new RectShape());
+        nodeInfoButtonShape.getPaint().setColor(Color.BLACK);
+        nodeInfoButtonShape.getPaint().setStrokeWidth(10f);
+        nodeInfoButtonShape.getPaint().setStyle(Paint.Style.STROKE);
+        nodeInfoButton.setBackground(nodeInfoButtonShape);
 
-        CustomButton testBtn = new CustomButton(context, btnCounter, viewText, contentDescription, hintText, labeledByElement, appName);
-        testBtn.setText(String.valueOf(btnCounter));
-        testBtn.setContentDescription("auto button");
-        testBtn.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        testBtn.setPadding(20,30,20,20);
-
-        ShapeDrawable shapedrawable = new ShapeDrawable();
-        shapedrawable.setShape(new RectShape());
-        shapedrawable.getPaint().setColor(Color.BLACK);
-        shapedrawable.getPaint().setStrokeWidth(10f);
-        shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
-        testBtn.setBackground(shapedrawable);
-
-        testBtn.setOnClickListener(new View.OnClickListener() {
+        nodeInfoButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                buttonClickTextTest = testBtn.showInformation();
-                showFloatingWindow(buttonClickTextTest);
+                viewElementDataString = nodeInfoButton.showInformation();
+                showFloatingInfoWindow(viewElementDataString);
             }
         });
 
-        wm.addView(testBtn, lp);
-
-        accessButtonList.add(testBtn);
-
-        btnCounter++;
-
+        wm.addView(nodeInfoButton, nodeLayoutParams);
+        nodeButtonsList.add(nodeInfoButton);
+        nodeCounter++;
 
         for (int i = 0; i < nodeInfo.getChildCount(); ++i) {
-
             logNodeHierarchy(nodeInfo.getChild(i), depth + 1);
-
         }
-
-
     }
 
-    public void showFloatingWindow(String initText){
+    public void showFloatingInfoWindow(String initText){
         Context context = getApplicationContext();
         lLayout = new LinearLayout(this);
 
-        if(viewIsSet){
+        if(floatingInfoBoxIsSet){
             wm.removeView(floatingInfobox);
         }
 
-        Button testButton = new Button(context);
 
-        LinearLayout.LayoutParams llParameters = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT);
-
-        WindowManager.LayoutParams lp2 = new WindowManager.LayoutParams();
+        WindowManager.LayoutParams infoWindowParams = new WindowManager.LayoutParams();
 
 
-        lp2.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-        lp2.format = PixelFormat.TRANSLUCENT;
-        lp2.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        lp2.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp2.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp2.gravity = Gravity.BOTTOM;
-        lp2.x = 0;
-        lp2.y = 0;
+        infoWindowParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        infoWindowParams.format = PixelFormat.TRANSLUCENT;
+        infoWindowParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        infoWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        infoWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        infoWindowParams.gravity = Gravity.BOTTOM;
+        infoWindowParams.x = 0;
+        infoWindowParams.y = 0;
 
 
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         floatingInfobox = layoutInflater.inflate(R.layout.floatingwindow, null);
 
-        TextView item = (TextView) floatingInfobox.findViewById(R.id.textView2);
-
-        item.setText(Html.fromHtml(initText));
-
-        lLayout.setLayoutParams(llParameters);
+        TextView infoWindowBox = (TextView) floatingInfobox.findViewById(R.id.infoWindowText);
+        infoWindowBox.setText(Html.fromHtml(initText));
 
         floatingInfobox.setOnTouchListener(new View.OnTouchListener() {
 
-            private WindowManager.LayoutParams updateParameters = lp2;
-            int x, y;
-            float touchedX, touchedY;
+            private WindowManager.LayoutParams updateParameters = infoWindowParams;
+            int y;
+            float touchedY;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -361,28 +287,24 @@ public class AccessibilityInspectorService extends AccessibilityService {
             }
         });
 
+        wm.addView(floatingInfobox,infoWindowParams);
 
-        wm.addView(floatingInfobox,lp2);
-
-        viewIsSet = true;
+        floatingInfoBoxIsSet = true;
 
     }
 
 
-    public void addExportButton(){
+    public void addShareButton(){
 
         Context context = getApplicationContext();
 
-
-        exportButton = new Button(this);
-        exportButton.setText("Export Button");
-
-
+        shareButton = new Button(this);
+        shareButton.setText("Ergebnis teilen");
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        WindowManager.LayoutParams theparams = new WindowManager.LayoutParams();
+        WindowManager.LayoutParams shareBtnParams;
 
-        theparams = new WindowManager.LayoutParams(
+        shareBtnParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
@@ -391,12 +313,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
                         |WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE ,
                 PixelFormat.TRANSLUCENT);
 
-        theparams.gravity = Gravity.TOP | Gravity.END;
+        shareBtnParams.gravity = Gravity.TOP | Gravity.END;
 
-        wm.addView(exportButton, theparams);
-
-
-
+/*      //Versuch TYPE_APPLICATION:
         lp.type = WindowManager.LayoutParams.TYPE_APPLICATION;
         lp.format = PixelFormat.TRANSLUCENT;
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -406,59 +325,51 @@ public class AccessibilityInspectorService extends AccessibilityService {
         //lp.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         lp.gravity = Gravity.TOP;
         lp.x = 0;
-        lp.y = 0;
+        lp.y = 0;*/
 
-        exportButton.setOnClickListener(new View.OnClickListener(){
+        wm.addView(shareButton, shareBtnParams);
+
+        shareButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                System.out.println("onclicker geklickt");
-                String btnNumber = "Test Anzahl " + btnCounter;
-                writeToFile(btnNumber, context);
+                writeToFile(context);
                 removeWindows();
-                goToMainActivity();
+                goToInspectorApp();
             }
         });
-
-
     }
 
 
-    private void goToMainActivity(){
-
-        //https://stackoverflow.com/questions/30800900/android-launch-another-app-from-activity
+    private void goToInspectorApp(){
 
         Context context = getApplicationContext();
-
         PackageManager pm = context.getPackageManager();
         Intent intent = pm.getLaunchIntentForPackage("com.example.accessibilityserviceappv2");
         if (intent != null) {
             context.startActivity(intent);
         }
-
     }
 
 
-    private void removeWindows(){
-
-        System.out.println(" windows removed");
-
-
+    private void removeWindows() {
 
         try {
+            for (CustomButton nb : nodeButtonsList) {
 
-
-                for (CustomButton ab: accessButtonList) {
-
-                    if( ViewCompat.isAttachedToWindow(ab)){
-
-                        wm.removeView(ab);
-                    }
-
+                if (ViewCompat.isAttachedToWindow(nb)) {
+                    wm.removeView(nb);
                 }
 
-                wm.removeView(floatingInfobox);
+            }
 
-                wm.removeView(exportButton);
-                viewIsSet=false;
+            if (ViewCompat.isAttachedToWindow(floatingInfobox)) {
+                wm.removeView(floatingInfobox);
+                floatingInfoBoxIsSet = false;
+
+            }
+
+            if (ViewCompat.isAttachedToWindow(shareButton)) {
+                wm.removeView(shareButton);
+            }
 
 
         } catch (Exception exception) {
@@ -468,13 +379,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
     }
 
 
-    private void writeToFile(String data,Context context) {
+    private void writeToFile(Context context) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("mytesttext.txt", Context.MODE_PRIVATE));
-
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("app-inspector-results.csv", Context.MODE_PRIVATE));
             String csvData = dataPreparation();
-
-
             outputStreamWriter.write(csvData);
             outputStreamWriter.close();
         }
@@ -485,21 +393,18 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     private String dataPreparation(){
 
-        Date date = new Date();
-        long timestamp = date.getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy' 'HH:mm:ss");
+        //ToDo: Überprüfen der Uhrzeit beim Export
+        DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
         String csvData;
-        String currentDate = sdf.format(timestamp);
-
+        String currentDate = df.toString();
         StringWriter sw = new StringWriter();
-
         String csvHeader = "Element-Nr, Beschriftung, Inhalts-Label, Hint, Zugeh. Label, Datum/ Zeit, Applikation";
 
         sw.append(csvHeader);
 
         sw.append("\n\r");
 
-        for (CustomButton ab: accessButtonList) {
+        for (CustomButton ab: nodeButtonsList) {
 
             sw.append(ab.getElementNumber());
             sw.append(",");
