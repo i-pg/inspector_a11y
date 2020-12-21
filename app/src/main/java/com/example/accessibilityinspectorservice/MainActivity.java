@@ -61,41 +61,24 @@ public class MainActivity extends AppCompatActivity {
 
     public void export(){
 
-        //generate data
-        StringBuilder data = new StringBuilder();
-        data.append("Time, Distance");
-        for(int i = 0; i<5; i++ ){
-            data.append("\n"+String.valueOf(i)+","+String.valueOf(i*i));
-        }
-
         try{
-            //saving the file into device
-            FileOutputStream out = openFileOutput("data.csv", Context.MODE_PRIVATE);
-            out.write((data.toString()).getBytes());
-            out.close();
-
 
             //exporting
             Context context = getApplicationContext();
 
-
-            File filelocation = new File(getFilesDir(), "mytesttext.txt");
+            File filelocation = new File(getFilesDir(), "newmytesttext.txt");
             Uri path = FileProvider.getUriForFile(context, "com.example.accessibilityserviceappv2.fileprovider", filelocation);
             Intent fileIntent = new Intent(Intent.ACTION_SEND);
-            //fileIntent.setAction(Intent.ACTION_SEND);
             fileIntent.setType("text/csv");
             fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Data");
             fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             fileIntent.putExtra(Intent.EXTRA_STREAM, path);
-            //fileIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-            //fileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(Intent.createChooser(fileIntent, "Send Mail"));
 
         }
         catch (Exception e){
             e.printStackTrace();
         }
-
 
     }
 }

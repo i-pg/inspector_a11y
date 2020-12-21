@@ -1,18 +1,11 @@
 package com.example.accessibilityinspectorservice;
 
 import android.accessibilityservice.AccessibilityService;
-import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
@@ -30,26 +23,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.core.view.ViewCompat;
 
 import com.example.accessibilityserviceappv2.R;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,7 +53,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     WindowManager wm;
 
     // Liste in der alle viewElementInformationButtons gespeichert werden
-    List <CustomButton> nodeButtonsList;
+    List <AccessNodeButton> nodeButtonsList;
     Button shareButton;
     String appName;
     String sharedPrefsHolder;
@@ -199,7 +182,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
             labeledByElement = "kein Label";
         }
 
-        CustomButton nodeInfoButton = new CustomButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName);
+        AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName);
         nodeInfoButton.setText(String.valueOf(nodeCounter));
         //ToDo: accessibility Richtlinien auch bei Service:
         //nodeInfoButton.setContentDescription("auto button");
@@ -215,7 +198,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         nodeInfoButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                viewElementDataString = nodeInfoButton.showInformation();
+                viewElementDataString = nodeInfoButton.getInformationString();
                 showFloatingInfoWindow(viewElementDataString);
             }
         });
@@ -331,7 +314,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         shareButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                writeToFile(context);
+                String btnNumber = "Nummer " + nodeCounter;
+                writeToFile(btnNumber, context);
                 removeWindows();
                 goToInspectorApp();
             }
@@ -353,7 +337,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     private void removeWindows() {
 
         try {
-            for (CustomButton nb : nodeButtonsList) {
+            for (AccessNodeButton nb : nodeButtonsList) {
 
                 if (ViewCompat.isAttachedToWindow(nb)) {
                     wm.removeView(nb);
@@ -379,9 +363,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
     }
 
 
-    private void writeToFile(Context context) {
+    private void writeToFile(String data, Context context) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("app-inspector-results.csv", Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("newmytesttext.txt", Context.MODE_PRIVATE));
             String csvData = dataPreparation();
             outputStreamWriter.write(csvData);
             outputStreamWriter.close();
@@ -393,10 +377,16 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     private String dataPreparation(){
 
+        Date date = new Date();
+        long timestamp = date.getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy' 'HH:mm:ss");
+        String currentDate = sdf.format(timestamp);
+
+
         //ToDo: Überprüfen der Uhrzeit beim Export
-        DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
+        //DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
         String csvData;
-        String currentDate = df.toString();
+       // String currentDate = df.toString();
         StringWriter sw = new StringWriter();
         String csvHeader = "Element-Nr, Beschriftung, Inhalts-Label, Hint, Zugeh. Label, Datum/ Zeit, Applikation";
 
@@ -404,7 +394,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         sw.append("\n\r");
 
-        for (CustomButton ab: nodeButtonsList) {
+        for (AccessNodeButton ab: nodeButtonsList) {
 
             sw.append(ab.getElementNumber());
             sw.append(",");
