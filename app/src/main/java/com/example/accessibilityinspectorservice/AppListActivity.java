@@ -52,7 +52,7 @@ public class AppListActivity extends ListActivity {
                     {
 
                         result.append(app_info[i].packageName);
-                        result.append(" ; ");
+                        result.append(";");
                     }
 
                 }

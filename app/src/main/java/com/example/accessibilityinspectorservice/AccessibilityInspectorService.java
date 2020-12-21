@@ -128,10 +128,11 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
 
-        if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
+        //if (e.getPackageName()!=null && e.getPackageName().toString().equals("com.example.emptytestapp")) {
         // Funktioniert nicht
-        // if (e.getPackageName()!=null && list.contains(testVar)) {
+        if (e.getPackageName()!=null && list.contains(testVar)) {
 
+            System.out.println("Liste " + list.toString());
 
 
             //if (e.getPackageName()!=null && e.getPackageName().toString().equals(myStrValue)) {
