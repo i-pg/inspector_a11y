@@ -79,6 +79,12 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
 
             switch (e.getEventType()) {
+
+                /*
+                 * Bei einer Änderung in einem optisch abgegrenzten Bereich der Benutzeroberfläche wird die Whitelist verglichen
+                 * Ist die aktuelle App in der Whitelist werden FloatingInfo Window, Nodes und Share-Button erstellt und als
+                 * Overlay hinzugefügt
+                 */
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
 
                     if(appsWhitelist.contains(currentPackageName)){
@@ -118,6 +124,14 @@ public class AccessibilityInspectorService extends AccessibilityService {
         Log.i("Service", "Connected");
     }
 
+    /*
+     * Alle Nodes im Screen werden gesammelt
+     * Koordinaten der einzelnen Nodes werden in einem Rect() gespeichert
+     * Die einzelnen Nodes werden als Custom Buttons (AccessNodeButton) in
+     * die App gezeichnet
+     * Für jede Node wird ein AccessNodeButton-Objekt erstellt in dem die
+     * Informationen der Node als Instanzvariablen gespeichert werden     *
+     */
 
     public void logNodeHierarchy(AccessibilityNodeInfo nodeInfo, int depth) {
 
@@ -212,6 +226,14 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
     }
 
+
+
+    /*
+     * Erstellen der Floating Info Box, welche die Informationen der einzelnen Nodes bei einem
+     * Klickt anzeigt.
+     * Die Box kann vertikal verschoben werden.
+     *
+     */
     public void showFloatingInfoWindow(String initText){
         Context context = getApplicationContext();
         lLayout = new LinearLayout(this);
@@ -322,6 +344,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
         });
     }
 
+    /*
+     * Die Informationen können nicht direkt aus dem Service geteilt werden. Deshalb werden die Daten gespeichert
+     * und der Nutzer an die Main Activity weitergeleitet, von wo aus ein Share Intent gestartet werden kann
+     */
 
     private void goToInspectorApp(){
 
