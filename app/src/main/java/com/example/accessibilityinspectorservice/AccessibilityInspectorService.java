@@ -1,9 +1,12 @@
 package com.example.accessibilityinspectorservice;
 
 import android.accessibilityservice.AccessibilityService;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Canvas;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.preference.PreferenceManager;
@@ -25,6 +28,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.view.ViewCompat;
 
@@ -58,6 +62,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     String appName;
     String sharedPrefsHolder;
     final String sharedPrefLabel = "appsToInspect";
+    int showButtonCounter = 1;
 
 
     @Override
@@ -87,7 +92,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
                  */
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
 
-                    if(appsWhitelist.contains(currentPackageName)){
+                    //ToDo: OR Teil entfernen - nur für testing
+                    if(appsWhitelist.contains(currentPackageName)||currentPackageName.equals("com.example.emptytestapp")){
                         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
                         showFloatingInfoWindow("Klicke auf eines der Elemente");
                         nodeButtonsList = new ArrayList();
@@ -196,7 +202,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
             labeledByElement = "kein Label";
         }
 
-        AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName);
+        AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName, rect);
         nodeInfoButton.setText(String.valueOf(nodeCounter));
         //ToDo: accessibility Richtlinien auch bei Service:
         //nodeInfoButton.setContentDescription("auto button");
@@ -260,7 +266,40 @@ public class AccessibilityInspectorService extends AccessibilityService {
         floatingInfobox = layoutInflater.inflate(R.layout.floatingwindow, null);
 
         TextView infoWindowBox = (TextView) floatingInfobox.findViewById(R.id.infoWindowText);
+        Button nextInfoButton = (Button) floatingInfobox.findViewById(R.id.nextInfoButton);
         infoWindowBox.setText(Html.fromHtml(initText));
+
+
+        nextInfoButton.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                  int currentElementNumber = showButtonCounter;
+
+                  AccessNodeButton currentButton = null;
+
+                  for(AccessNodeButton cB : nodeButtonsList){
+
+                      if(cB.getElementInteger() == currentElementNumber){
+                          viewElementDataString = cB.getInformationString();
+                          showFloatingInfoWindow(viewElementDataString);
+                          highlightCurrentElement(cB);
+                          break;
+                      }
+
+                  }
+
+                  if(showButtonCounter<nodeButtonsList.size()){
+                      showButtonCounter++;
+                  }
+                  else {
+                      showButtonCounter = 1;
+                  }
+
+
+              }
+          }
+
+        );
 
         floatingInfobox.setOnTouchListener(new View.OnTouchListener() {
 
@@ -298,6 +337,35 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     }
 
+    public void highlightCurrentElement(AccessNodeButton currentElement){
+
+        removeHighlights();
+
+        Rect coordinates = currentElement.getCoordinates();
+        Context context = getApplicationContext();
+
+        //Set the color of the higlighted Elements border
+        ShapeDrawable shapedrawable = new ShapeDrawable();
+        shapedrawable.setShape(new RectShape());
+        shapedrawable.getPaint().setColor(Color.RED);
+        shapedrawable.getPaint().setStrokeWidth(20f);
+        shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
+        currentElement.setBackground(shapedrawable);
+
+        WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
+
+        nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
+        nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        nodeLayoutParams.width = coordinates.width();
+        nodeLayoutParams.height = coordinates.height();
+        nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
+        nodeLayoutParams.x = coordinates.left;
+        nodeLayoutParams.y = coordinates.top - 70;
+
+        wm.addView(currentElement, nodeLayoutParams);
+
+    }
 
     public void addShareButton(){
 
@@ -386,6 +454,16 @@ public class AccessibilityInspectorService extends AccessibilityService {
             exception.printStackTrace();
         }
 
+    }
+
+    private void removeHighlights(){
+        for (AccessNodeButton nb : nodeButtonsList) {
+
+            if (ViewCompat.isAttachedToWindow(nb)) {
+                wm.removeView(nb);
+            }
+
+        }
     }
 
 

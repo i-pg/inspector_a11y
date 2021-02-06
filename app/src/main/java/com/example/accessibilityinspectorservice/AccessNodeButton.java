@@ -1,6 +1,7 @@
 package com.example.accessibilityinspectorservice;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,13 +24,14 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
     String hintText;
     String labeledByElement;
     String appName;
+    Rect coordinates;
 
 
     public AccessNodeButton(Context context) {
-        this(context, 0, null, null, null, null, null);
+        this(context, 0, null, null, null, null, null, null);
     }
 
-    public AccessNodeButton(Context context, int btnCounter, String viewText, String contentDescription, String hintText, String labeledByElement, String appName) {
+    public AccessNodeButton(Context context, int btnCounter, String viewText, String contentDescription, String hintText, String labeledByElement, String appName, Rect coordinates) {
         super(context);
         init();
         this.btnCounter = btnCounter;
@@ -39,6 +41,7 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
         this.labeledByElement = labeledByElement;
         this.context = context;
         this.appName = appName;
+        this.coordinates = coordinates;
     }
 
     private void init(){
@@ -62,6 +65,12 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
         return String.valueOf(btnCounter);
 
     }
+
+    public int getElementInteger(){
+
+        return btnCounter;
+
+    }
     public String getElementText(){
 
         return viewText;
@@ -75,6 +84,10 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
         return hintText;
 
     }
+
+    public Rect getCoordinates(){
+        return coordinates;
+    }
     public String getLabeledByElement(){
         return labeledByElement;
     }
@@ -83,5 +96,6 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
     public String getAppName(){
         return appName;
     }
+
 
 }
