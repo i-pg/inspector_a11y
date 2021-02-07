@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
@@ -66,6 +67,13 @@ public class AccessibilityInspectorService extends AccessibilityService {
     final String sharedPrefLabel = "appsToInspect";
     int showButtonCounter = 0;
     boolean elementsHighlighted = true;
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        removeWindows();
+        logNodeHierarchy(getRootInActiveWindow(), 0);
+    }
 
 
     @Override
