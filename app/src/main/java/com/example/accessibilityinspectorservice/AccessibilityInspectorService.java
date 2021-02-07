@@ -302,20 +302,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                   else {
                       showButtonCounter = 1;
                   }
-
-                  int currentElementNumber = showButtonCounter;
-
-                  for(AccessNodeButton cB : nodeButtonsList){
-
-                      if(cB.getElementInteger() == currentElementNumber){
-                          viewElementDataString = cB.getInformationString();
-                          highlightCurrentElement(cB);
-                          showFloatingInfoWindow(viewElementDataString);
-                          break;
-                      }
-
-                  }
-
+                  selectCurrentElement();
 
               }
           }
@@ -330,6 +317,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     removeHighlights();
                     elementsHighlighted=false;
                     showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
+                    selectCurrentElement();
                 }
                 else if(!elementsHighlighted){
 
@@ -356,16 +344,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 }
                 int currentElementNumber = showButtonCounter;
 
-                for(AccessNodeButton cB : nodeButtonsList){
-
-                    if(cB.getElementInteger() == currentElementNumber){
-                        viewElementDataString = cB.getInformationString();
-                        highlightCurrentElement(cB);
-                        showFloatingInfoWindow(viewElementDataString);
-                        break;
-                    }
-
-                }
+                selectCurrentElement();
 
                 //showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
 
@@ -416,6 +395,21 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         floatingInfoBoxIsSet = true;
 
+    }
+
+    public void selectCurrentElement(){
+        int currentElementNumber = showButtonCounter;
+
+        for(AccessNodeButton cB : nodeButtonsList){
+
+            if(cB.getElementInteger() == currentElementNumber){
+                viewElementDataString = cB.getInformationString();
+                highlightCurrentElement(cB);
+                showFloatingInfoWindow(viewElementDataString);
+                break;
+            }
+
+        }
     }
 
     public void highlightCurrentElement(AccessNodeButton currentElement){
