@@ -64,7 +64,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     String appName;
     String sharedPrefsHolder;
     final String sharedPrefLabel = "appsToInspect";
-    int showButtonCounter = 1;
+    int showButtonCounter = 0;
 
 
     @Override
@@ -270,6 +270,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         TextView infoWindowBox = (TextView) floatingInfobox.findViewById(R.id.infoWindowText);
         infoWindowBox.setMovementMethod(new ScrollingMovementMethod());
         ImageButton nextInfoButton = (ImageButton) floatingInfobox.findViewById(R.id.nextInfoButton);
+        ImageButton prevInfoButton = (ImageButton) floatingInfobox.findViewById(R.id.prevInfoButton);
         ImageButton shareButton = (ImageButton) floatingInfobox.findViewById(R.id.shareButton);
         infoWindowBox.setText(Html.fromHtml(initText));
 
@@ -277,20 +278,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         nextInfoButton.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
-                  int currentElementNumber = showButtonCounter;
 
-                  AccessNodeButton currentButton = null;
-
-                  for(AccessNodeButton cB : nodeButtonsList){
-
-                      if(cB.getElementInteger() == currentElementNumber){
-                          viewElementDataString = cB.getInformationString();
-                          showFloatingInfoWindow(viewElementDataString);
-                          highlightCurrentElement(cB);
-                          break;
-                      }
-
-                  }
 
                   if(showButtonCounter<nodeButtonsList.size()){
                       showButtonCounter++;
@@ -299,11 +287,50 @@ public class AccessibilityInspectorService extends AccessibilityService {
                       showButtonCounter = 1;
                   }
 
+                  int currentElementNumber = showButtonCounter;
+
+                  for(AccessNodeButton cB : nodeButtonsList){
+
+                      if(cB.getElementInteger() == currentElementNumber){
+                          viewElementDataString = cB.getInformationString();
+                          highlightCurrentElement(cB);
+                          showFloatingInfoWindow(viewElementDataString);
+                          break;
+                      }
+
+                  }
+
 
               }
           }
 
         );
+
+        prevInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(showButtonCounter>1){
+                    showButtonCounter--;
+                }
+                else{
+                    showButtonCounter=nodeButtonsList.size();
+                }
+                int currentElementNumber = showButtonCounter;
+
+                for(AccessNodeButton cB : nodeButtonsList){
+
+                    if(cB.getElementInteger() == currentElementNumber){
+                        viewElementDataString = cB.getInformationString();
+                        highlightCurrentElement(cB);
+                        showFloatingInfoWindow(viewElementDataString);
+                        break;
+                    }
+
+                }
+
+            }
+        });
 
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
