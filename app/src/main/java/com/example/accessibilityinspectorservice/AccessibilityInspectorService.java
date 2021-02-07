@@ -11,6 +11,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -26,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -92,14 +94,15 @@ public class AccessibilityInspectorService extends AccessibilityService {
                  */
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
 
+                    Log.v(LOG_TAG, e.getPackageName().toString());
                     //ToDo: OR Teil entfernen - nur für testing
                     if(appsWhitelist.contains(currentPackageName)||currentPackageName.equals("com.example.emptytestapp")){
                         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-                        showFloatingInfoWindow("Klicke auf eines der Elemente");
                         nodeButtonsList = new ArrayList();
                         appName =  e.getPackageName().toString();
                         logNodeHierarchy(getRootInActiveWindow(), 0);
                         addShareButton();
+                        showFloatingInfoWindow("Klicke auf eines der Elemente");
                     }
 
                     else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
@@ -266,7 +269,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
         floatingInfobox = layoutInflater.inflate(R.layout.floatingwindow, null);
 
         TextView infoWindowBox = (TextView) floatingInfobox.findViewById(R.id.infoWindowText);
-        Button nextInfoButton = (Button) floatingInfobox.findViewById(R.id.nextInfoButton);
+        infoWindowBox.setMovementMethod(new ScrollingMovementMethod());
+        ImageButton nextInfoButton = (ImageButton) floatingInfobox.findViewById(R.id.nextInfoButton);
+       // ImageButton shareButton =
         infoWindowBox.setText(Html.fromHtml(initText));
 
 

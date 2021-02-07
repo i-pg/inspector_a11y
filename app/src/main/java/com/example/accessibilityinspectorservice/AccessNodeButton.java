@@ -56,7 +56,7 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
     }
 
     public String getInformationString(){
-        String InformationString = "<b>Element Nummer:</b> " + btnCounter + "<br><b>View Text: </b>" + viewText + "<br><b>Inhaltslabel:  </b>" + contentDescription + "<br><b>Zugeh. Label: </b>"+ labeledByElement + "<br><b>Hint: </b>" + hintText;
+        String InformationString = "<b>Element Nummer:</b> " + btnCounter + "<br><b>View Text: </b>" + viewText + "<br><b>Inhaltslabel: </b> Loremt Ipsum kjfds fsioejfsio seifosi aow ioa ijfoise ajoief isjfoijsef aijfoiwaf ijasoivosiemvoieoiq iaiof aoijf wiafoi jwawwwfda  op p ijfasf i iofaij " + contentDescription + "<br><b>Zugeh. Label: </b>"+ labeledByElement + "<br><b>Hint: </b>" + hintText;
         return InformationString;
     }
 
