@@ -65,6 +65,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     String sharedPrefsHolder;
     final String sharedPrefLabel = "appsToInspect";
     int showButtonCounter = 0;
+    boolean elementsHighlighted = true;
 
 
     @Override
@@ -101,7 +102,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
                         nodeButtonsList = new ArrayList();
                         appName =  e.getPackageName().toString();
                         logNodeHierarchy(getRootInActiveWindow(), 0);
-                        showFloatingInfoWindow("Gefundene Elemente: " + nodeButtonsList.size());
+                        viewElementDataString = "Gefundene Elemente: " + nodeButtonsList.size();
+                        showFloatingInfoWindow(viewElementDataString);
                     }
 
                     else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
@@ -213,6 +215,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         ShapeDrawable nodeInfoButtonShape = new ShapeDrawable();
         nodeInfoButtonShape.setShape(new RectShape());
+        //Farbe der highlight kästchen zu Beginn:
         nodeInfoButtonShape.getPaint().setColor(Color.BLACK);
         nodeInfoButtonShape.getPaint().setStrokeWidth(10f);
         nodeInfoButtonShape.getPaint().setStyle(Paint.Style.STROKE);
@@ -272,12 +275,25 @@ public class AccessibilityInspectorService extends AccessibilityService {
         ImageButton nextInfoButton = (ImageButton) floatingInfobox.findViewById(R.id.nextInfoButton);
         ImageButton prevInfoButton = (ImageButton) floatingInfobox.findViewById(R.id.prevInfoButton);
         ImageButton shareButton = (ImageButton) floatingInfobox.findViewById(R.id.shareButton);
+        ImageButton showHighlightsButton = (ImageButton) floatingInfobox.findViewById(R.id.showElementsButton);
         infoWindowBox.setText(Html.fromHtml(initText));
+
+        if(elementsHighlighted){
+            showHighlightsButton.setImageResource(R.drawable.eye_25);
+        }
+        else {
+            showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
+
+        }
+
 
 
         nextInfoButton.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
+
+                  elementsHighlighted = false;
+                  //showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
 
 
                   if(showButtonCounter<nodeButtonsList.size()){
@@ -306,9 +322,31 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         );
 
+        showHighlightsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(elementsHighlighted){
+                    removeHighlights();
+                    elementsHighlighted=false;
+                    showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
+                }
+                else if(!elementsHighlighted){
+
+                    highlightAllElements();
+                    elementsHighlighted=true;
+                    showHighlightsButton.setImageResource(R.drawable.eye_25);
+
+                }
+
+            }
+        });
+
         prevInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                elementsHighlighted = false;
 
                 if(showButtonCounter>1){
                     showButtonCounter--;
@@ -328,6 +366,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     }
 
                 }
+
+                //showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
 
             }
         });
@@ -408,6 +448,50 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     }
 
+    public void highlightAllElements(){
+
+        if(!elementsHighlighted){
+
+            for(AccessNodeButton aB:nodeButtonsList){
+
+                Rect coordinates = aB.getCoordinates();
+
+                //Set the color of the higlighted Elements border
+                ShapeDrawable shapedrawable = new ShapeDrawable();
+                shapedrawable.setShape(new RectShape());
+                shapedrawable.getPaint().setColor(Color.BLACK);
+                shapedrawable.getPaint().setStrokeWidth(20f);
+                shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
+                aB.setBackground(shapedrawable);
+
+                WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
+
+                nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+                nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
+                nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                nodeLayoutParams.width = coordinates.width();
+                nodeLayoutParams.height = coordinates.height();
+                nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
+                nodeLayoutParams.x = coordinates.left;
+                nodeLayoutParams.y = coordinates.top - 70;
+
+
+                if(aB.getWindowToken() == null){
+                    wm.addView(aB, nodeLayoutParams);
+                }
+
+            }
+
+            elementsHighlighted=true;
+
+            showFloatingInfoWindow(viewElementDataString);
+
+        }
+
+
+
+    }
+
     /*
      * Die Informationen können nicht direkt aus dem Service geteilt werden. Deshalb werden die Daten gespeichert
      * und der Nutzer an die Main Activity weitergeleitet, von wo aus ein Share Intent gestartet werden kann
@@ -460,6 +544,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
             }
 
         }
+
+        elementsHighlighted = false;
     }
 
 
