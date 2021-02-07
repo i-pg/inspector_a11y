@@ -101,7 +101,6 @@ public class AccessibilityInspectorService extends AccessibilityService {
                         nodeButtonsList = new ArrayList();
                         appName =  e.getPackageName().toString();
                         logNodeHierarchy(getRootInActiveWindow(), 0);
-                        addShareButton();
                         showFloatingInfoWindow("Klicke auf eines der Elemente");
                     }
 
@@ -271,7 +270,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         TextView infoWindowBox = (TextView) floatingInfobox.findViewById(R.id.infoWindowText);
         infoWindowBox.setMovementMethod(new ScrollingMovementMethod());
         ImageButton nextInfoButton = (ImageButton) floatingInfobox.findViewById(R.id.nextInfoButton);
-       // ImageButton shareButton =
+        ImageButton shareButton = (ImageButton) floatingInfobox.findViewById(R.id.shareButton);
         infoWindowBox.setText(Html.fromHtml(initText));
 
 
@@ -305,6 +304,16 @@ public class AccessibilityInspectorService extends AccessibilityService {
           }
 
         );
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String btnNumber = "Nummer " + nodeCounter;
+                writeToFile(btnNumber, context);
+                removeWindows();
+                goToInspectorApp();
+            }
+        });
 
         floatingInfobox.setOnTouchListener(new View.OnTouchListener() {
 
@@ -370,51 +379,6 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         wm.addView(currentElement, nodeLayoutParams);
 
-    }
-
-    public void addShareButton(){
-
-        Context context = getApplicationContext();
-
-        shareButton = new Button(this);
-        shareButton.setText("Ergebnis teilen");
-
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        WindowManager.LayoutParams shareBtnParams;
-
-        shareBtnParams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
-                        |WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-                        |WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE ,
-                PixelFormat.TRANSLUCENT);
-
-        shareBtnParams.gravity = Gravity.TOP | Gravity.END;
-
-/*      //Versuch TYPE_APPLICATION:
-        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION;
-        lp.format = PixelFormat.TRANSLUCENT;
-        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        // lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        //lp.alpha = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        lp.gravity = Gravity.TOP;
-        lp.x = 0;
-        lp.y = 0;*/
-
-        wm.addView(shareButton, shareBtnParams);
-
-        shareButton.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-                String btnNumber = "Nummer " + nodeCounter;
-                writeToFile(btnNumber, context);
-                removeWindows();
-                goToInspectorApp();
-            }
-        });
     }
 
     /*

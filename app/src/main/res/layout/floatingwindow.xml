@@ -31,6 +31,13 @@
                 android:src="@drawable/move_arrows25" />
 
             <ImageButton
+                android:id="@+id/imageButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/eye_25" />
+
+            <ImageButton
                 android:id="@+id/shareButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
