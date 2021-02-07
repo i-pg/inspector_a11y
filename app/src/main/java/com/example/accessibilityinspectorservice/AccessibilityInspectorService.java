@@ -101,7 +101,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                         nodeButtonsList = new ArrayList();
                         appName =  e.getPackageName().toString();
                         logNodeHierarchy(getRootInActiveWindow(), 0);
-                        showFloatingInfoWindow("Klicke auf eines der Elemente");
+                        showFloatingInfoWindow("Gefundene Elemente: " + nodeButtonsList.size());
                     }
 
                     else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
