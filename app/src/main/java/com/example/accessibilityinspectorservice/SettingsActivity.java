@@ -2,6 +2,7 @@ package com.example.accessibilityinspectorservice;
 
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.MenuItem;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -40,5 +41,20 @@ public class SettingsActivity extends AppCompatActivity {
         public void onCreatePreferencesFix(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
