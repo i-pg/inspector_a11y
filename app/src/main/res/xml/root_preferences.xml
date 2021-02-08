@@ -8,7 +8,7 @@
             app:key="text_size_pref_inspector"
             app:title="@string/text_size_title"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="22"
+            app:defaultValue="18"
             android:inputType="number"
             />
 
@@ -23,7 +23,7 @@
             app:entryValues="@array/color_values"
             app:key="highlight_color_pref_inspector"
             app:title="@string/highlight_color_title"
-            app:defaultValue="#ff0000"
+            app:defaultValue="ff0000"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

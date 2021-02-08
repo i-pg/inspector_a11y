@@ -65,7 +65,12 @@ public class AccessibilityInspectorService extends AccessibilityService {
     Button shareButton;
     String appName;
     String sharedPrefsHolder;
+    String sharedPrefColorsHolder;
+    String sharedPrefTextsizeHolder;
+    int textSizeNumber = 18;
     final String sharedPrefLabel = "appsToInspect";
+    final String sharedPrefColors = "highlight_color_pref_inspector";
+    final String sharedPrefTextsize = "text_size_pref_inspector";
     int showButtonCounter = 0;
     boolean elementsHighlighted = true;
 
@@ -82,6 +87,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sharedPrefsHolder = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
+        sharedPrefColorsHolder = prefs.getString(sharedPrefColors, "#000000");
+        sharedPrefTextsizeHolder = prefs.getString(sharedPrefTextsize, "20");
+        textSizeNumber = Integer.parseInt(sharedPrefTextsizeHolder);
+
         String splitHelperString = sharedPrefsHolder;
         List<String> appsWhitelist = Arrays.asList(splitHelperString.split(";"));
 
@@ -225,7 +234,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
         ShapeDrawable nodeInfoButtonShape = new ShapeDrawable();
         nodeInfoButtonShape.setShape(new RectShape());
         //Farbe der highlight kästchen zu Beginn:
-        nodeInfoButtonShape.getPaint().setColor(Color.BLACK);
+        nodeInfoButtonShape.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
+
         nodeInfoButtonShape.getPaint().setStrokeWidth(10f);
         nodeInfoButtonShape.getPaint().setStyle(Paint.Style.STROKE);
         nodeInfoButton.setBackground(nodeInfoButtonShape);
@@ -287,6 +297,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
         ImageButton showHighlightsButton = (ImageButton) floatingInfobox.findViewById(R.id.showElementsButton);
         infoWindowBox.setText(Html.fromHtml(initText));
 
+        //Textgröße anpassen
+        infoWindowBox.setTextSize(textSizeNumber);
+
         if(elementsHighlighted){
             showHighlightsButton.setImageResource(R.drawable.eye_25);
         }
@@ -343,14 +356,15 @@ public class AccessibilityInspectorService extends AccessibilityService {
             @Override
             public void onClick(View v) {
 
+                //Log all Shared Prefs
+                /*
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
                 Map<String, ?> allEntries = prefs.getAll();
                 for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
                     Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
-                }
+                }*/
 
-               /* elementsHighlighted = false;
+               elementsHighlighted = false;
 
                 if(showButtonCounter>1){
                     showButtonCounter--;
@@ -363,7 +377,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 selectCurrentElement();
 
                 //showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
-*/
+
             }
         });
 
@@ -438,7 +452,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
         //Set the color of the higlighted Elements border
         ShapeDrawable shapedrawable = new ShapeDrawable();
         shapedrawable.setShape(new RectShape());
-        shapedrawable.getPaint().setColor(Color.RED);
+
+        shapedrawable.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
+
         shapedrawable.getPaint().setStrokeWidth(20f);
         shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
         currentElement.setBackground(shapedrawable);
@@ -469,7 +485,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 //Set the color of the higlighted Elements border
                 ShapeDrawable shapedrawable = new ShapeDrawable();
                 shapedrawable.setShape(new RectShape());
-                shapedrawable.getPaint().setColor(Color.BLACK);
+                shapedrawable.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
                 shapedrawable.getPaint().setStrokeWidth(20f);
                 shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
                 aB.setBackground(shapedrawable);
