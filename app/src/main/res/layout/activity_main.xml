@@ -7,39 +7,44 @@
     tools:context="com.example.accessibilityinspectorservice.MainActivity">
 
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/exportDataButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="176dp"
-        android:text="Export Data"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.483"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.548" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="50dp"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/appSelectorScreenBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select App"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/exportDataButton"
-        app:layout_constraintVertical_bias="0.254" />
+        <TextView
+            android:id="@+id/headline_main"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:textSize="40dp"
+            android:gravity="center"
+            android:layout_weight="0.25"
+            android:text="A11y Inspector" />
 
-    <Button
-        android:id="@+id/settingsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Einstellungen"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appSelectorScreenBtn" />
+        <Button
+            android:id="@+id/appSelectorScreenBtn"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.25"
+            android:text="Zu untersuchende Apps auswählen" />
+
+        <Button
+            android:id="@+id/settingsButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.25"
+            android:background="@color/Red"
+            android:text="Einstellungen" />
+
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/exportDataButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.25"
+            android:text="Fehlerbericht teilen" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
