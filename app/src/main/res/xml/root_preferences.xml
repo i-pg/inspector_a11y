@@ -1,0 +1,32 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="@string/fonts_header">
+
+
+        <EditTextPreference
+            app:key="text_size_pref_inspector"
+            app:title="@string/text_size_title"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="22"
+            android:inputType="number"
+            />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/colors_header">
+
+
+        <ListPreference
+            app:entries="@array/color_entries"
+            app:entryValues="@array/color_values"
+            app:key="highlight_color_pref_inspector"
+            app:title="@string/highlight_color_title"
+            app:defaultValue="#ff0000"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

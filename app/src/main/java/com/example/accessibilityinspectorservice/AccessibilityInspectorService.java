@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class AccessibilityInspectorService extends AccessibilityService {
 
@@ -342,7 +343,14 @@ public class AccessibilityInspectorService extends AccessibilityService {
             @Override
             public void onClick(View v) {
 
-                elementsHighlighted = false;
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+                Map<String, ?> allEntries = prefs.getAll();
+                for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+                    Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+                }
+
+               /* elementsHighlighted = false;
 
                 if(showButtonCounter>1){
                     showButtonCounter--;
@@ -355,7 +363,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 selectCurrentElement();
 
                 //showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
-
+*/
             }
         });
 

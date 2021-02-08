@@ -12,7 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AccessibilityServiceAppV2">
-        <activity android:name="com.example.accessibilityinspectorservice.AppListActivity"></activity>
+        <activity
+            android:name="com.example.accessibilityinspectorservice.SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
+        <activity android:name="com.example.accessibilityinspectorservice.AppListActivity" />
         <activity android:name="com.example.accessibilityinspectorservice.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,6 +23,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.example.accessibilityinspectorservice.MainActivity"/>
 
         <service
             android:name="com.example.accessibilityinspectorservice.AccessibilityInspectorService"
