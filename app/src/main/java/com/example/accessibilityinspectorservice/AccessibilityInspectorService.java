@@ -2,6 +2,8 @@ package com.example.accessibilityinspectorservice;
 
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -387,8 +389,23 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 String btnNumber = "Nummer " + nodeCounter;
                 writeToFile(btnNumber, context);
                 removeWindows();
-                goToInspectorApp();
-            }
+
+                AlertDialog alertDialog = new AlertDialog.Builder(context)
+                        .setTitle("Bericht erstellt")
+                        .setMessage("Dein Fehlerbericht wurde erstellt. Du wirst nun zur Inspector App weitergeleitet. " +
+                                "\n\nUm deinen Bericht zu teilen klicke dort auf 'Fehlerbericht teilen'")
+
+                .setPositiveButton("Verstanden", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        goToInspectorApp();
+                    }
+                })
+                        .create();
+
+                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+                alertDialog.show();
+                }
         });
 
         floatingInfobox.setOnTouchListener(new View.OnTouchListener() {
