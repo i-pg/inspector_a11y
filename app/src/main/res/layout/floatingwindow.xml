@@ -18,16 +18,16 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="70dp"
             android:layout_weight="0.2"
             android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/moveableButton"
                 android:layout_width="0dp"
-                android:clickable="false"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:clickable="false"
                 android:src="@drawable/move_arrows25" />
 
             <ImageButton
@@ -40,9 +40,17 @@
             <ImageButton
                 android:id="@+id/shareButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:src="@drawable/share_25" />
+
+            <ImageButton
+                android:id="@+id/exitButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clickable="false"
+                android:src="@drawable/close25" />
         </LinearLayout>
 
         <LinearLayout
@@ -65,14 +73,14 @@
             <TextView
                 android:id="@+id/infoWindowText"
                 android:layout_width="0dp"
-                android:scrollbars="vertical"
                 android:layout_height="243dp"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
                 android:layout_weight="0.7"
-                android:fontFamily="sans-serif-thin"
+                android:fontFamily="sans-serif"
                 android:gravity="center_vertical"
                 android:lineSpacingExtra="20sp"
+                android:scrollbars="vertical"
                 android:text="This is the floating text view\n Hallo"
                 android:textColor="@color/white"
                 android:textSize="20sp" />

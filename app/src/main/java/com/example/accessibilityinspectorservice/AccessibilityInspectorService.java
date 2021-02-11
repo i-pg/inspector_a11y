@@ -126,9 +126,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
                         showFloatingInfoWindow(viewElementDataString);
                     }
 
-                    else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
+/*                    else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
                         removeWindows();
-                    }
+                    }*/
 
                 }
 
@@ -200,14 +200,14 @@ public class AccessibilityInspectorService extends AccessibilityService {
             viewText = nodeInfo.getText().toString();
         }
         else {
-            viewText = "keiner";
+            viewText = "-";
         }
 
         if(nodeInfo.getContentDescription()!=null){
             contentDescription = nodeInfo.getContentDescription().toString();
         }
         else {
-            contentDescription = "keines";
+            contentDescription = "-";
         }
 
         if(nodeInfo.getHintText()!=null){
@@ -215,7 +215,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
         else {
-            hintText = "keiner";
+            hintText = "-";
         }
 
         if(nodeInfo.getLabeledBy()!=null){
@@ -223,7 +223,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
         else {
-            labeledByElement = "kein Label";
+            labeledByElement = "-";
         }
 
         AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName, rect);
@@ -297,6 +297,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         ImageButton prevInfoButton = (ImageButton) floatingInfobox.findViewById(R.id.prevInfoButton);
         ImageButton shareButton = (ImageButton) floatingInfobox.findViewById(R.id.shareButton);
         ImageButton showHighlightsButton = (ImageButton) floatingInfobox.findViewById(R.id.showElementsButton);
+        ImageButton exitButton = (ImageButton) floatingInfobox.findViewById(R.id.exitButton);
         infoWindowBox.setText(Html.fromHtml(initText));
 
         //Textgröße anpassen
@@ -406,6 +407,13 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                 alertDialog.show();
                 }
+        });
+
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeWindows();
+            }
         });
 
         floatingInfobox.setOnTouchListener(new View.OnTouchListener() {
