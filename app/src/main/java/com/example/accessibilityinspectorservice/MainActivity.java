@@ -4,12 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 
 import com.example.accessibilityserviceappv2.R;
@@ -30,6 +35,26 @@ public class MainActivity extends AppCompatActivity {
         Button testButoon = (Button) findViewById(R.id.exportDataButton);
         Button showAppSelectorBtn = (Button) findViewById(R.id.appSelectorScreenBtn);
         Button openSettingsButton = (Button) findViewById(R.id.settingsButton);
+
+        //Prüfe ob der Accessibility Service aktiviert ist
+        if (this.checkSelfPermission(Manifest.permission.BIND_ACCESSIBILITY_SERVICE)!= PackageManager.PERMISSION_GRANTED) {
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Inspector A11y Service aktivieren")
+                    .setMessage("Starte in den Bedienungshilfen deines Smartphones den Inspector A11y Service um die App zu verwenden")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            Intent openSettings = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                            openSettings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            startActivity(openSettings);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+
 
         if (!Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -59,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+
 
     public void export(){
 
