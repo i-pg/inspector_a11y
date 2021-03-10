@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">AccessibilityServiceAppV2</string>
     <string name="title_activity_settings">Einstellungen</string>
+    <string name="accessibility_service_description">Dieser Service erlaubt der Inspector A11y App deinen Bildschirm zu untersuchen. Der Inspector erzeugt ein Overlay mit Accessibilty Informationen wie sie auch ein Screenreader verwendet. Hierfür muss zunächst in der App ausgewählt werden, welche Apps der Inspector untersuchen soll.</string>
 
     <!-- Fonts Titles -->
     <string name="messages_header">Messages</string>

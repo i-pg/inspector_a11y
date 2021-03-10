@@ -20,7 +20,7 @@
             android:textSize="40dp"
             android:gravity="center"
             android:layout_weight="0.25"
-            android:text="A11y Inspector" />
+            android:text="Inspector A11y" />
 
         <Button
             android:id="@+id/appSelectorScreenBtn"
