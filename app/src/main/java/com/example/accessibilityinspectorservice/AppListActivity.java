@@ -60,7 +60,7 @@ public class AppListActivity extends ListActivity {
                 resultString = result.toString();
 
                 writeStringToSharedContent(resultString);
-                Toast.makeText(AppListActivity.this, result, Toast.LENGTH_SHORT).show();
+                killActivity();
             }
 
         });
@@ -105,5 +105,9 @@ public class AppListActivity extends ListActivity {
     public void writeStringToSharedContent(String resultString){
         prefEditor.putString(sharedPrefLabel, resultString);
         prefEditor.apply();
+    }
+
+    private void killActivity() {
+        finish();
     }
 }
