@@ -11,4 +11,18 @@
         <item>#000000</item>
         <item>#0000ff</item>
     </string-array>
+
+
+    <string-array name="credits_list">
+        <item>Quelle 1</item>
+        <item>Quelle 2</item>
+        <item>Quelle 3</item>
+    </string-array>
+
+
+    <string-array name="credits_list_value">
+        <item>Quelle 1</item>
+        <item>Quelle 2</item>
+        <item>Quelle 3</item>
+    </string-array>
 </resources>

@@ -28,5 +28,27 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/about_header">
+
+
+        <ListPreference
+            android:key="pref_list"
+            android:title="@string/credits_title"
+            android:selectable="false"
+            android:entries="@array/credits_list"
+            android:entryValues="@array/credits_list_value"
+            android:defaultValue="0" />
+
+        <Preference
+            android:selectable="false"
+            android:enabled="true"
+            android:key="example_key"
+            android:title="Icons"
+            android:summary="@string/credits_list" />
+
+    </PreferenceCategory>
+
+
+
 
 </PreferenceScreen>

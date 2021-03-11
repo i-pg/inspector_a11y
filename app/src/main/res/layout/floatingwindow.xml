@@ -35,7 +35,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/eye_25" />
+                android:src="@drawable/squares_25" />
 
             <ImageButton
                 android:id="@+id/shareButton"

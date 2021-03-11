@@ -304,10 +304,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
         infoWindowBox.setTextSize(textSizeNumber);
 
         if(elementsHighlighted){
-            showHighlightsButton.setImageResource(R.drawable.eye_25);
+            showHighlightsButton.setImageResource(R.drawable.squares_25);
         }
         else {
-            showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
+            showHighlightsButton.setImageResource(R.drawable.square_25);
 
         }
 
@@ -341,14 +341,14 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 if(elementsHighlighted){
                     removeHighlights();
                     elementsHighlighted=false;
-                    showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
+                    showHighlightsButton.setImageResource(R.drawable.square_25);
                     selectCurrentElement();
                 }
                 else if(!elementsHighlighted){
 
                     highlightAllElements();
                     elementsHighlighted=true;
-                    showHighlightsButton.setImageResource(R.drawable.eye_25);
+                    showHighlightsButton.setImageResource(R.drawable.squares_25);
 
                 }
 

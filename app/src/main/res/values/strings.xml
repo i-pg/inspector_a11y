@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AccessibilityServiceAppV2</string>
+    <string name="app_name">InspectorA11y</string>
     <string name="title_activity_settings">Einstellungen</string>
     <string name="accessibility_service_description">Dieser Service erlaubt der Inspector A11y App deinen Bildschirm zu untersuchen. Der Inspector erzeugt ein Overlay mit Accessibilty Informationen wie sie auch ein Screenreader verwendet. Hierfür muss zunächst in der App ausgewählt werden, welche Apps der Inspector untersuchen soll.</string>
 
@@ -7,12 +7,13 @@
     <string name="messages_header">Messages</string>
     <string name="fonts_header">Schriftgröße</string>
     <string name="colors_header">Farben</string>
+    <string name="about_header">Über</string>
     <string name="sync_header">Sync</string>
 
     <string name="text_size_title">Textgröße</string>
     <string name="highlight_color_title">Highlights Farbe</string>
-
-
+    <string name="credits_title">Credits</string>
+    <string name="credits_list">Icon made by Pixel perfect from www.flaticon.com\n\nIcon made by Roundicons from www.flaticon.com\n\nIcon made by Becris from www.flaticon.com\n\nIcon made by Freepik from www.flaticon.com</string>
 
     <!-- Color Preferences -->
     <string name="signature_title">Your signature</string>
