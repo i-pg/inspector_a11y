@@ -602,7 +602,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     private void writeToFile(String data, Context context) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("newmytesttext.txt", Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("accessibility_report.txt", Context.MODE_PRIVATE));
             String csvData = dataPreparation();
             outputStreamWriter.write(csvData);
             outputStreamWriter.close();

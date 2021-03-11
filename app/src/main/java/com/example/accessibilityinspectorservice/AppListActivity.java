@@ -69,8 +69,27 @@ public class AppListActivity extends ListActivity {
         ApplicationInfo applicationInfo = getApplicationInfo();
         PackageManager pm = getPackageManager();
         List<ApplicationInfo> pInfo = new ArrayList<ApplicationInfo>();
-        pInfo.addAll(pm.getInstalledApplications(PackageManager.GET_META_DATA));
 
+        List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+
+        for (ApplicationInfo app : apps) {
+            if(pm.getLaunchIntentForPackage(app.packageName) != null) {
+                // apps with launcher intent
+                if((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 1) {
+                    // updated system apps
+
+                } else if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 1) {
+                    // system apps
+
+                } else {
+                    // user installed apps
+                    pInfo.add(app);
+
+                }
+            }
+
+        }
 
         //Sortieren der gefundenen Applications
         Collections.sort(pInfo, new ApplicationInfo.DisplayNameComparator(pm));

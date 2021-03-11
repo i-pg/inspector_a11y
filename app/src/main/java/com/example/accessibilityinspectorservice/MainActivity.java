@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE}, 1);
 
-        Button testButoon = (Button) findViewById(R.id.exportDataButton);
+        Button exportButton = (Button) findViewById(R.id.exportDataButton);
         Button showAppSelectorBtn = (Button) findViewById(R.id.appSelectorScreenBtn);
         Button openSettingsButton = (Button) findViewById(R.id.settingsButton);
 
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, 0);
         }
 
-        testButoon.setOnClickListener(new View.OnClickListener() {
+        exportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 export();
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             //exporting
             Context context = getApplicationContext();
 
-            File filelocation = new File(getFilesDir(), "newmytesttext.txt");
+            File filelocation = new File(getFilesDir(), "accessibility_report.txt");
             Uri path = FileProvider.getUriForFile(context, "com.example.accessibilityserviceappv2.fileprovider", filelocation);
             Intent fileIntent = new Intent(Intent.ACTION_SEND);
             fileIntent.setType("text/csv");
