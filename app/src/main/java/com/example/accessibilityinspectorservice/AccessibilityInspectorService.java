@@ -205,103 +205,103 @@ public class AccessibilityInspectorService extends AccessibilityService {
             logString += " ";
         }
 
-        //Koordinaten der Node:
-        nodeInfo.getBoundsInScreen(rect);
-        Context context = getApplicationContext();
-
-        logString += "\nElement: " + nodeCounter + "\n Text: " + nodeInfo.getText() + "\n" + " Content-Description: " + nodeInfo.getContentDescription() + "\n App Name: " + appname + "\n Koordinaten " +rect + "\n Hint " + nodeInfo.getHintText() + "\n Labeled By " + nodeInfo.getLabeledBy();
-        Log.v(LOG_TAG, logString);
-
-        WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
-
-        nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-        nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
-        nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
-        nodeLayoutParams.width = rect.width();
-        nodeLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
-        nodeLayoutParams.x = rect.left;
-        nodeLayoutParams.y = rect.top - 70;
-
-        if(nodeInfo.getText()!=null){
+        if (nodeInfo.getText() != null) {
             viewText = nodeInfo.getText().toString();
-        }
-        else {
+        } else {
             viewText = "-";
         }
 
-        if(nodeInfo.getContentDescription()!=null){
+        if (nodeInfo.getContentDescription() != null) {
             contentDescription = nodeInfo.getContentDescription().toString();
-        }
-        else {
+        } else {
             contentDescription = "-";
         }
 
-        if(nodeInfo.getHintText()!=null){
+        if (nodeInfo.getHintText() != null) {
             hintText = nodeInfo.getHintText().toString();
-        }
-
-        else {
+        } else {
             hintText = "-";
         }
 
-        if(nodeInfo.getLabeledBy()!=null){
+        if (nodeInfo.getLabeledBy() != null) {
             labeledByElement = nodeInfo.getLabeledBy().getText().toString();
-        }
-
-        else {
+        } else {
             labeledByElement = "-";
         }
 
-        if(nodeInfo.getClassName()!=null){
+        if (nodeInfo.getClassName() != null) {
             // split by "." to get class name
-            String currentString  = nodeInfo.getClassName().toString();
-            String [] separated = currentString.split("\\.");
-            className = separated[separated.length-1];
-        }
-
-        else {
+            String currentString = nodeInfo.getClassName().toString();
+            String[] separated = currentString.split("\\.");
+            className = separated[separated.length - 1];
+        } else {
             className = "-";
         }
 
-        if(nodeInfo.getPackageName()!=null){
+        if (nodeInfo.getPackageName() != null) {
             // split by "." to get class name
-            String currentString  = nodeInfo.getPackageName().toString();
-            String [] separated = currentString.split("\\.");
-            shortAppName = separated[separated.length-1];
-        }
-
-        else {
+            String currentString = nodeInfo.getPackageName().toString();
+            String[] separated = currentString.split("\\.");
+            shortAppName = separated[separated.length - 1];
+        } else {
             shortAppName = "-";
         }
 
 
-        AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, shortAppName, className, rect);
-        nodeInfoButton.setText(String.valueOf(nodeCounter));
-        //ToDo: accessibility Richtlinien auch bei Service:
-        //nodeInfoButton.setContentDescription("auto button");
-        nodeInfoButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        nodeInfoButton.setPadding(20,30,20,20);
+        String keyword_one = "layout";
+        String keyword_two = "scrollview";
 
-        ShapeDrawable nodeInfoButtonShape = new ShapeDrawable();
-        nodeInfoButtonShape.setShape(new RectShape());
-        //Farbe der highlight kästchen zu Beginn:
-        nodeInfoButtonShape.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
+        if (!className.toLowerCase().contains(keyword_one.toLowerCase() ) && !className.toLowerCase().contains(keyword_two.toLowerCase() ) ) {
 
-        nodeInfoButtonShape.getPaint().setStrokeWidth(10f);
-        nodeInfoButtonShape.getPaint().setStyle(Paint.Style.STROKE);
-        nodeInfoButton.setBackground(nodeInfoButtonShape);
+            //Koordinaten der Node:
+            nodeInfo.getBoundsInScreen(rect);
+            Context context = getApplicationContext();
 
-        nodeInfoButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                viewElementDataString = nodeInfoButton.getInformationString();
-                showFloatingInfoWindow(viewElementDataString);
-            }
-        });
+            logString += "\nElement: " + nodeCounter + "\n Text: " + nodeInfo.getText() + "\n" + " Content-Description: " + nodeInfo.getContentDescription() + "\n App Name: " + appname + "\n Koordinaten " + rect + "\n Hint " + nodeInfo.getHintText() + "\n Labeled By " + nodeInfo.getLabeledBy();
+            Log.v(LOG_TAG, logString);
 
-        wm.addView(nodeInfoButton, nodeLayoutParams);
-        nodeButtonsList.add(nodeInfoButton);
-        nodeCounter++;
+            WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
+
+            nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+            nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
+            nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            nodeLayoutParams.width = rect.width();
+            nodeLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
+            nodeLayoutParams.x = rect.left;
+            nodeLayoutParams.y = rect.top - 70;
+
+
+            AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, shortAppName, className, rect);
+            nodeInfoButton.setText(String.valueOf(nodeCounter));
+            //ToDo: accessibility Richtlinien auch bei Service:
+            //nodeInfoButton.setContentDescription("auto button");
+            nodeInfoButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            nodeInfoButton.setPadding(20, 30, 20, 20);
+
+            ShapeDrawable nodeInfoButtonShape = new ShapeDrawable();
+            nodeInfoButtonShape.setShape(new RectShape());
+            //Farbe der highlight kästchen zu Beginn:
+            nodeInfoButtonShape.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
+
+            nodeInfoButtonShape.getPaint().setStrokeWidth(10f);
+            nodeInfoButtonShape.getPaint().setStyle(Paint.Style.STROKE);
+            nodeInfoButton.setBackground(nodeInfoButtonShape);
+
+            nodeInfoButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    viewElementDataString = nodeInfoButton.getInformationString();
+                    showFloatingInfoWindow(viewElementDataString);
+                }
+            });
+
+            wm.addView(nodeInfoButton, nodeLayoutParams);
+            nodeButtonsList.add(nodeInfoButton);
+            nodeCounter++;
+
+
+
+        }
 
         for (int i = 0; i < nodeInfo.getChildCount(); ++i) {
             logNodeHierarchy(nodeInfo.getChild(i), depth + 1);
