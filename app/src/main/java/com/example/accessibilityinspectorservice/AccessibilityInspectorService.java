@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -58,6 +59,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     int nodeCounter;
     View floatingInfobox;
     String viewElementDataString;
+    Boolean scanStarted = false;
 
     Boolean floatingInfoBoxIsSet = false;
     WindowManager wm;
@@ -132,6 +134,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     Log.v(LOG_TAG, e.getPackageName().toString());
                     //ToDo: OR Teil entfernen - nur für testing
                     if(appsWhitelist.contains(currentPackageName)||currentPackageName.equals("com.example.emptytestapp")){
+                            removeHighlights();
+
                         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
                         nodeButtonsList = new ArrayList();
                         appName =  e.getPackageName().toString();
@@ -638,13 +642,17 @@ public class AccessibilityInspectorService extends AccessibilityService {
     }
 
     private void removeHighlights(){
-        for (AccessNodeButton nb : nodeButtonsList) {
 
-            if (ViewCompat.isAttachedToWindow(nb)) {
-                wm.removeView(nb);
+        if(nodeButtonsList!=null){
+            for (AccessNodeButton nb : nodeButtonsList) {
+
+                if (ViewCompat.isAttachedToWindow(nb)) {
+                    wm.removeView(nb);
+                }
+
             }
-
         }
+
 
         elementsHighlighted = false;
     }
