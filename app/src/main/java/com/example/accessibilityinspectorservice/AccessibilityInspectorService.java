@@ -59,7 +59,6 @@ public class AccessibilityInspectorService extends AccessibilityService {
     int nodeCounter;
     View floatingInfobox;
     String viewElementDataString;
-    Boolean scanStarted = false;
 
     Boolean floatingInfoBoxIsSet = false;
     WindowManager wm;
@@ -90,92 +89,69 @@ public class AccessibilityInspectorService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent e) {
 
-        //ToDo: 12_3
         Log.w("EVENT TYPE", AccessibilityEvent.eventTypeToString(e.getEventType()));
 
 
-        //System.out.println(e.getEventType().toString());
-        // Funktioniert //if (e.getEventType() == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
-
-            //if (e.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            //Log.w("COn Changed=", " yes");
-
-
-        //Log.v("EVENT TYPE: ", e.getEventTypeToString());
-        //removeWindows();
-
+        //get shared Preferences for Inspector Settings
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sharedPrefsHolder = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
         sharedPrefColorsHolder = prefs.getString(sharedPrefColors, "#000000");
         sharedPrefTextsizeHolder = prefs.getString(sharedPrefTextsize, "20");
         textSizeNumber = Integer.parseInt(sharedPrefTextsizeHolder);
 
+        //Whitelist - Apps to Inspect
         String splitHelperString = sharedPrefsHolder;
         List<String> appsWhitelist = Arrays.asList(splitHelperString.split(";"));
-
 
         nodeCounter = 1;
         String currentPackageName = "init text";
 
 
-        if (e.getPackageName()!=null) {
+        /*
+         * On Change of Windows State ("Optisch abgegrenzter Bereich in der UI") - check Whitelist
+         * Create Floating Window and Nodes
+         * Add Overlay
+         * Log.v(LOG_TAG, e.getPackageName().toString());
+         */
 
+
+        if (e.getPackageName()!=null) {
             currentPackageName = e.getPackageName().toString();
 
 
             switch (e.getEventType()) {
 
-                /*
-                 * Bei einer Änderung in einem optisch abgegrenzten Bereich der Benutzeroberfläche wird die Whitelist verglichen
-                 * Ist die aktuelle App in der Whitelist werden FloatingInfo Window, Nodes und Share-Button erstellt und als
-                 * Overlay hinzugefügt
-                 */
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
 
-                    Log.v(LOG_TAG, e.getPackageName().toString());
-                    //ToDo: OR Teil entfernen - nur für testing
-                    if(appsWhitelist.contains(currentPackageName)||currentPackageName.equals("com.example.emptytestapp")){
-                            removeHighlights();
+                    if(appsWhitelist.contains(currentPackageName)){
+
+                        removeHighlights();
                         showButtonCounter = 1;
-
-
                         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+
                         nodeButtonsList = new ArrayList();
                         appName =  e.getPackageName().toString();
+                        //log tree of all AccessibilityNodes
                         logNodeHierarchy(getRootInActiveWindow(), 0);
+                        //Init Floating Window
                         viewElementDataString = "Gefundene Elemente: " + nodeButtonsList.size();
                         showFloatingInfoWindow(viewElementDataString);
                     }
 
-/*                    else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
-                        removeWindows();
-                    }*/
-
                 }
 
-                    case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
-                        //ToDo: wm.updateViewLayout();
-                        Log.w("Scrolled =", " yes");
-
-                        if(appsWhitelist.contains(currentPackageName)||currentPackageName.equals("com.example.emptytestapp")) {
-                            //removeWindows();
-                            displayToast("Scrollen noch nicht implementiert");
-
-                        }
+                //Future Work: Reload on Scroll
+                case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
+                    //Log.w("Scrolled =", " yes");
+                    if(appsWhitelist.contains(currentPackageName)||currentPackageName.equals("com.example.emptytestapp")) {
+                        displayToast("Scrollen noch nicht implementiert");
                     }
                 }
-
+            }
         }
-
     }
 
-    public void displayToast(String message) {
-        if(myToast != null)
-            myToast.cancel();
-        myToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-        myToast.setGravity(Gravity.TOP, 0, 300); //<-- set gravity here
-        myToast.show();
-    }
+
 
 
     @Override
@@ -216,30 +192,32 @@ public class AccessibilityInspectorService extends AccessibilityService {
             logString += " ";
         }
 
+        //Collect Accessibility Information
+        //text
         if (nodeInfo.getText() != null) {
             viewText = nodeInfo.getText().toString();
         } else {
             viewText = "-";
         }
-
+        //content label
         if (nodeInfo.getContentDescription() != null) {
             contentDescription = nodeInfo.getContentDescription().toString();
         } else {
             contentDescription = "-";
         }
-
+        //hint
         if (nodeInfo.getHintText() != null) {
             hintText = nodeInfo.getHintText().toString();
         } else {
             hintText = "-";
         }
-
+        //labeled by
         if (nodeInfo.getLabeledBy() != null) {
             labeledByElement = nodeInfo.getLabeledBy().getText().toString();
         } else {
             labeledByElement = "-";
         }
-
+        //element type
         if (nodeInfo.getClassName() != null) {
             // split by "." to get class name
             String currentString = nodeInfo.getClassName().toString();
@@ -248,9 +226,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
         } else {
             className = "-";
         }
-
+        //app name
         if (nodeInfo.getPackageName() != null) {
-            // split by "." to get class name
+            // split by "." to get app name
             String currentString = nodeInfo.getPackageName().toString();
             String[] separated = currentString.split("\\.");
             shortAppName = separated[separated.length - 1];
@@ -259,6 +237,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
 
+        //Filter Layout Elments
         String keyword_one = "layout";
         String keyword_two = "scrollview";
         String keyword_three = "ViewGroup";
@@ -266,13 +245,11 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         if (!className.toLowerCase().contains(keyword_one.toLowerCase() ) && !className.toLowerCase().contains(keyword_two.toLowerCase() ) ) {
 
-            //Koordinaten der Node:
+            //Node coordinates
             nodeInfo.getBoundsInScreen(rect);
             Context context = getApplicationContext();
 
-            logString += "\nElement: " + nodeCounter + "\n Text: " + nodeInfo.getText() + "\n" + " Content-Description: " + nodeInfo.getContentDescription() + "\n App Name: " + appname + "\n Koordinaten " + rect + "\n Hint " + nodeInfo.getHintText() + "\n Labeled By " + nodeInfo.getLabeledBy();
-            Log.v(LOG_TAG, logString);
-
+            //Params for AccessNodeButtons
             WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
 
             nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -284,23 +261,21 @@ public class AccessibilityInspectorService extends AccessibilityService {
             nodeLayoutParams.x = rect.left;
             nodeLayoutParams.y = rect.top - 70;
 
-
+            //Create AccessNodeButton (Clickable Numbers and Frames for discorverd View Elements
             AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, shortAppName, className, rect);
             nodeInfoButton.setText(String.valueOf(nodeCounter));
-            //ToDo: accessibility Richtlinien auch bei Service:
-            //nodeInfoButton.setContentDescription("auto button");
             nodeInfoButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             nodeInfoButton.setPadding(20, 30, 20, 20);
 
+            //Highlight Elements
             ShapeDrawable nodeInfoButtonShape = new ShapeDrawable();
             nodeInfoButtonShape.setShape(new RectShape());
-            //Farbe der highlight kästchen zu Beginn:
             nodeInfoButtonShape.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
-
             nodeInfoButtonShape.getPaint().setStrokeWidth(10f);
             nodeInfoButtonShape.getPaint().setStyle(Paint.Style.STROKE);
             nodeInfoButton.setBackground(nodeInfoButtonShape);
 
+            //On Click: Show Information in Infobox
             nodeInfoButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     viewElementDataString = nodeInfoButton.getInformationString();
@@ -311,11 +286,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
             wm.addView(nodeInfoButton, nodeLayoutParams);
             nodeButtonsList.add(nodeInfoButton);
             nodeCounter++;
-
-
-
         }
 
+        //repeat for each Element in tree
         for (int i = 0; i < nodeInfo.getChildCount(); ++i) {
             logNodeHierarchy(nodeInfo.getChild(i), depth + 1);
         }
@@ -324,10 +297,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
 
     /*
-     * Erstellen der Floating Info Box, welche die Informationen der einzelnen Nodes bei einem
-     * Klickt anzeigt.
-     * Die Box kann vertikal verschoben werden.
-     *
+     * Create Floating Info Box
+     * Show Information of Info-Nodes
+     * moveable (vertical)
      */
     public void showFloatingInfoWindow(String initText){
         Context context = getApplicationContext();
@@ -338,9 +310,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
 
+        //Infobox Layout Params
         WindowManager.LayoutParams infoWindowParams = new WindowManager.LayoutParams();
-
-
         infoWindowParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
         infoWindowParams.format = PixelFormat.TRANSLUCENT;
         infoWindowParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -351,6 +322,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         infoWindowParams.y = 0;
 
 
+        //Get Buttons and Textview in Infobox
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         floatingInfobox = layoutInflater.inflate(R.layout.floatingwindow, null);
 
@@ -361,42 +333,62 @@ public class AccessibilityInspectorService extends AccessibilityService {
         ImageButton shareButton = (ImageButton) floatingInfobox.findViewById(R.id.shareButton);
         ImageButton showHighlightsButton = (ImageButton) floatingInfobox.findViewById(R.id.showElementsButton);
         ImageButton exitButton = (ImageButton) floatingInfobox.findViewById(R.id.exitButton);
+
+
+        //Set Text
         infoWindowBox.setText(Html.fromHtml(initText));
 
-        //Textgröße anpassen
+        // Set TextSize
         infoWindowBox.setTextSize(textSizeNumber);
 
+        //Show Hightlight Button state
         if(elementsHighlighted){
             showHighlightsButton.setImageResource(R.drawable.squares_25);
         }
         else {
             showHighlightsButton.setImageResource(R.drawable.square_25);
-
         }
 
 
+        /*
+         *  Implement Infobox Buttons
+         *
+         */
 
+        //right infobox button - show next Element
         nextInfoButton.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
-
+                  //show only current Element
                   elementsHighlighted = false;
-                  //showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
-
-
+                  //edge detection
                   if(showButtonCounter<nodeButtonsList.size()){
                       showButtonCounter++;
-                  }
-                  else {
+                  } else {
                       showButtonCounter = 1;
                   }
                   selectCurrentElement();
-
               }
           }
 
         );
+        //left infobox button - show previous Element
+        prevInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //show only current Element
+                elementsHighlighted = false;
+                //edge detection
+                if(showButtonCounter>1){
+                    showButtonCounter--;
+                } else {
+                    showButtonCounter=nodeButtonsList.size();
+                }
+                selectCurrentElement();
+            }
+        });
 
+        //hightlight all elements or current element
         showHighlightsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -408,45 +400,15 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     selectCurrentElement();
                 }
                 else if(!elementsHighlighted){
-
                     highlightAllElements();
                     elementsHighlighted=true;
                     showHighlightsButton.setImageResource(R.drawable.squares_25);
-
                 }
-
             }
         });
 
-        prevInfoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                //Log all Shared Prefs
-                /*
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                Map<String, ?> allEntries = prefs.getAll();
-                for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-                    Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
-                }*/
-
-               elementsHighlighted = false;
-
-                if(showButtonCounter>1){
-                    showButtonCounter--;
-                }
-                else{
-                    showButtonCounter=nodeButtonsList.size();
-                }
-                int currentElementNumber = showButtonCounter;
-
-                selectCurrentElement();
-
-                //showHighlightsButton.setImageResource(R.drawable.eyelashes_25);
-
-            }
-        });
-
+        //share report
+        //save data in local storage - go to inspector app to open Share Intent
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -455,23 +417,25 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 removeWindows();
 
                 AlertDialog alertDialog = new AlertDialog.Builder(context)
+                        //ToDo: string.xml
                         .setTitle("Bericht erstellt")
                         .setMessage("Dein Fehlerbericht wurde erstellt. Du wirst nun zur Inspector App weitergeleitet. " +
                                 "\n\nUm deinen Bericht zu teilen klicke dort auf 'Fehlerbericht teilen'")
 
-                .setPositiveButton("Verstanden", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        goToInspectorApp();
-                    }
-                })
+                        .setPositiveButton("Verstanden", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                goToInspectorApp();
+                            }
+                        })
                         .create();
 
                 alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                 alertDialog.show();
-                }
+            }
         });
 
+        //close Service
         exitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -479,6 +443,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
             }
         });
 
+        //make infobox moveable
         floatingInfobox.setOnTouchListener(new View.OnTouchListener() {
 
             private WindowManager.LayoutParams updateParameters = infoWindowParams;
@@ -492,29 +457,25 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     case MotionEvent.ACTION_DOWN:
                         y = updateParameters.y;
                         touchedY = event.getRawY();
-
                         break;
 
                     case MotionEvent.ACTION_MOVE:
                         updateParameters.y = (int) (y - (event.getRawY() - touchedY));
-
                         wm.updateViewLayout(floatingInfobox, updateParameters);
 
                     default:
-
                         break;
                 }
-
                 return false;
             }
         });
-
         wm.addView(floatingInfobox,infoWindowParams);
-
         floatingInfoBoxIsSet = true;
 
     }
 
+
+    //show highlights - select current element
     public void selectCurrentElement(){
         int currentElementNumber = showButtonCounter;
 
@@ -529,26 +490,22 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         }
     }
-
     public void highlightCurrentElement(AccessNodeButton currentElement){
 
         removeHighlights();
-
         Rect coordinates = currentElement.getCoordinates();
         Context context = getApplicationContext();
 
-        //Set the color of the higlighted Elements border
+        //Set the border color of the highlighted Elements
         ShapeDrawable shapedrawable = new ShapeDrawable();
         shapedrawable.setShape(new RectShape());
-
         shapedrawable.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
-
         shapedrawable.getPaint().setStrokeWidth(20f);
         shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
         currentElement.setBackground(shapedrawable);
 
+        //Layout Params AccessNode Elements
         WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
-
         nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
         nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
         nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
@@ -559,9 +516,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
         nodeLayoutParams.y = coordinates.top - 70;
 
         wm.addView(currentElement, nodeLayoutParams);
-
     }
 
+    //show highlights - select all elements
     public void highlightAllElements(){
 
         if(!elementsHighlighted){
@@ -570,7 +527,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
                 Rect coordinates = aB.getCoordinates();
 
-                //Set the color of the higlighted Elements border
+                //Set the border color of the highlighted Elements
                 ShapeDrawable shapedrawable = new ShapeDrawable();
                 shapedrawable.setShape(new RectShape());
                 shapedrawable.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
@@ -578,8 +535,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
                 aB.setBackground(shapedrawable);
 
+                //Layout Params AccessNode Elements
                 WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
-
                 nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
                 nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
                 nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
@@ -597,22 +554,32 @@ public class AccessibilityInspectorService extends AccessibilityService {
             }
 
             elementsHighlighted=true;
-
+            //update text in Infobox
             showFloatingInfoWindow(viewElementDataString);
-
         }
+    }
 
 
+    /*
+     * Helper Functions
+     *
+     */
 
+
+    public void displayToast(String message) {
+        if(myToast != null)
+            myToast.cancel();
+        myToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        myToast.setGravity(Gravity.TOP, 0, 300); //<-- set gravity here
+        myToast.show();
     }
 
     /*
-     * Die Informationen können nicht direkt aus dem Service geteilt werden. Deshalb werden die Daten gespeichert
-     * und der Nutzer an die Main Activity weitergeleitet, von wo aus ein Share Intent gestartet werden kann
+     * Launch Inspector App to Share Report
+     * Cannot start share itent in Service - redirect to main activity
      */
 
-    private void goToInspectorApp(){
-
+    private void goToInspectorApp() {
         Context context = getApplicationContext();
         PackageManager pm = context.getPackageManager();
         Intent intent = pm.getLaunchIntentForPackage("com.example.accessibilityserviceappv2");
@@ -621,28 +588,18 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
     }
 
-
+    //remove AccessNode Buttons and Infobox
     private void removeWindows() {
-
         try {
             for (AccessNodeButton nb : nodeButtonsList) {
-
                 if (ViewCompat.isAttachedToWindow(nb)) {
                     wm.removeView(nb);
                 }
-
             }
-
             if (ViewCompat.isAttachedToWindow(floatingInfobox)) {
                 wm.removeView(floatingInfobox);
                 floatingInfoBoxIsSet = false;
-
             }
-
-            if (ViewCompat.isAttachedToWindow(shareButton)) {
-                wm.removeView(shareButton);
-            }
-
 
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -650,6 +607,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     }
 
+    //remove AccessNode Buttons
     private void removeHighlights(){
 
         if(nodeButtonsList!=null){
@@ -661,8 +619,6 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
             }
         }
-
-
         elementsHighlighted = false;
     }
 
@@ -679,27 +635,20 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
     }
 
+    //create CSV File for Report
     private String dataPreparation(){
-
         Date date = new Date();
         long timestamp = date.getTime();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy' 'HH:mm:ss");
         String currentDate = sdf.format(timestamp);
-
-
-        //ToDo: Überprüfen der Uhrzeit beim Export
-        //DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
         String csvData;
-       // String currentDate = df.toString();
         StringWriter sw = new StringWriter();
         String csvHeader = "Element-Nr, Beschriftung, Inhalts-Label, Hint, Zugeh. Label, Element-Typ, Datum/ Zeit, Applikation";
 
         sw.append(csvHeader);
-
         sw.append("\n\r");
 
         for (AccessNodeButton ab: nodeButtonsList) {
-
             sw.append(ab.getElementNumber());
             sw.append(",");
             sw.append(ab.getElementText());

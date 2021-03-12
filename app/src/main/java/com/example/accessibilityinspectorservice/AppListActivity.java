@@ -17,6 +17,10 @@ import java.util.Collections;
 import java.util.List;
 import static java.lang.String.valueOf;
 
+/*
+ * Activity with List of all installed Apps - Check to add do Whitelist
+ *
+ */
 public class AppListActivity extends ListActivity {
 
     ApplicationAdapter adapter ;
@@ -34,14 +38,16 @@ public class AppListActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_list);
 
+        //Share Whitelist with SharePreferences
         prefEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         sendAppslistButton = (Button) findViewById(R.id.checkButton);
 
         final ListView listApplication = (ListView)findViewById(R.id.listView);
+
         sendAppslistButton= (Button) findViewById(R.id.checkButton);
+
         sendAppslistButton.setOnClickListener(new View.OnClickListener()
         {
-
             @Override
             public void onClick(View v) {
 
@@ -50,15 +56,11 @@ public class AppListActivity extends ListActivity {
                 {
                     if(adapter.mCheckStates.get(i))
                     {
-
                         result.append(app_info[i].packageName);
                         result.append(";");
                     }
-
                 }
-
                 resultString = result.toString();
-
                 writeStringToSharedContent(resultString);
                 killActivity();
             }
@@ -72,7 +74,8 @@ public class AppListActivity extends ListActivity {
 
         List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
-
+        //Create List of installed apps
+        //remove System Apps and Launcher from List
         for (ApplicationInfo app : apps) {
             if(pm.getLaunchIntentForPackage(app.packageName) != null) {
                 // apps with launcher intent
@@ -85,40 +88,30 @@ public class AppListActivity extends ListActivity {
                 } else {
                     // user installed apps
                     pInfo.add(app);
-
                 }
             }
 
         }
 
-        //Sortieren der gefundenen Applications
+        //sort list of installed apps
         Collections.sort(pInfo, new ApplicationInfo.DisplayNameComparator(pm));
 
-
         app_info = new AppInfo[pInfo.size()];
-
         counter = 0;
         for(ApplicationInfo item: pInfo){
             try{
-
                 applicationInfo = pm.getApplicationInfo(item.packageName, 0);
-
                 String packageInfo = item.packageName;
-
                 app_info[counter] = new AppInfo(pm.getApplicationIcon(applicationInfo),
                         valueOf(pm.getApplicationLabel(applicationInfo)), packageInfo);
-
             }
             catch(Exception e){
                 System.out.println(e.getMessage());
             }
-
             counter++;
         }
-
         adapter = new ApplicationAdapter(this, R.layout.row, app_info);
         listApplication.setAdapter(adapter);
-
     }
 
     public void writeStringToSharedContent(String resultString){
@@ -126,6 +119,7 @@ public class AppListActivity extends ListActivity {
         prefEditor.apply();
     }
 
+    //go back to main activity
     private void killActivity() {
         finish();
     }

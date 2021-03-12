@@ -13,6 +13,10 @@ import com.takisoft.preferencex.PreferenceFragmentCompat;
 
 import com.example.accessibilityserviceappv2.R;
 
+/*
+ * App Settings
+ *
+ */
 public class SettingsActivity extends AppCompatActivity {
 
     @Override
@@ -30,10 +34,6 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
-
-
-
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {

@@ -2,6 +2,8 @@ package com.example.accessibilityinspectorservice;
 
 import android.graphics.drawable.Drawable;
 
+//App Info Elements
+//Use for List of all installed Applications
 public class AppInfo {
     public Drawable icon;
     public String applicationName;

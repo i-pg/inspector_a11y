@@ -24,6 +24,10 @@ import java.io.File;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
+/*
+ * Inspector App Main Activity
+ *
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -36,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         Button showAppSelectorBtn = (Button) findViewById(R.id.appSelectorScreenBtn);
         Button openSettingsButton = (Button) findViewById(R.id.settingsButton);
 
-        //Prüfe ob der Accessibility Service aktiviert ist
+        //Check if Accessibility Service is activated
         if (this.checkSelfPermission(Manifest.permission.BIND_ACCESSIBILITY_SERVICE)!= PackageManager.PERMISSION_GRANTED) {
 
             new AlertDialog.Builder(this)
@@ -44,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
                     .setMessage("Starte in den Bedienungshilfen deines Smartphones den Inspector A11y Service um die App zu verwenden")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-
                             Intent openSettings = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
                             openSettings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
                             startActivity(openSettings);
@@ -56,26 +59,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+        //Check Overlay Permissions
         if (!Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, 0);
         }
 
+        //Implement Menu-Buttons
         exportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 export();
             }
         });
-
         showAppSelectorBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, AppListActivity.class));
             }
         });
-
         openSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,11 +89,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    //Share Report Intent
     public void export(){
-
         try{
-
             //exporting
             Context context = getApplicationContext();
 
@@ -102,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
             fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             fileIntent.putExtra(Intent.EXTRA_STREAM, path);
             startActivity(Intent.createChooser(fileIntent, "Send Mail"));
-
         }
         catch (Exception e){
             e.printStackTrace();

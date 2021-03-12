@@ -1,12 +1,7 @@
 package com.example.accessibilityinspectorservice;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +11,11 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.example.accessibilityserviceappv2.R;
+
+/*
+ *  Adapter for App Selection (whitelist) - Apps to inspect
+ */
 
 public class ApplicationAdapter extends ArrayAdapter<AppInfo> implements CompoundButton.OnCheckedChangeListener
     {  SparseBooleanArray mCheckStates;
@@ -47,7 +44,6 @@ public class ApplicationAdapter extends ArrayAdapter<AppInfo> implements Compoun
                 row = inflater.inflate(layoutResourceId, parent, false);
 
                 holder = new AppInfoHolder();
-
                 holder.imgIcon = (ImageView) row.findViewById(R.id.app_icon);
                 holder.txtTitle = (TextView) row.findViewById(R.id.app_name);
                 holder.packageName = (TextView) row.findViewById(R.id.app_paackage);
