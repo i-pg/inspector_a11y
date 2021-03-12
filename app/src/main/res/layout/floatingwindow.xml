@@ -26,6 +26,7 @@
                 android:id="@+id/moveableButton"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:contentDescription="move box button"
                 android:layout_weight="1"
                 android:clickable="false"
                 android:backgroundTint="@color/DarkGray"
@@ -33,6 +34,7 @@
 
             <ImageButton
                 android:id="@+id/showElementsButton"
+                android:contentDescription="button to show or hide all elements"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -40,6 +42,7 @@
 
             <ImageButton
                 android:id="@+id/shareButton"
+                android:contentDescription="button to create report. auto-redirection to inspector a11y app to share the report"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -48,6 +51,7 @@
             <ImageButton
                 android:id="@+id/exitButton"
                 android:layout_width="0dp"
+                android:contentDescription="button to close the overlay and remove all service information"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:clickable="false"
@@ -64,6 +68,7 @@
             <ImageButton
                 android:id="@+id/prevInfoButton"
                 android:layout_width="0dp"
+                android:contentDescription="button to navigate to the previous info element"
                 android:layout_height="match_parent"
                 android:layout_weight="0.15"
                 android:adjustViewBounds="true"
@@ -76,6 +81,7 @@
                 android:layout_width="0dp"
                 android:layout_height="243dp"
                 android:layout_marginStart="20dp"
+                android:contentDescription="Textfield with information about the current selected element"
                 android:layout_marginEnd="20dp"
                 android:layout_weight="0.7"
                 android:fontFamily="sans-serif"
@@ -89,6 +95,7 @@
             <ImageButton
                 android:id="@+id/nextInfoButton"
                 android:layout_width="0dp"
+                android:contentDescription="button to navigate to the next info element"
                 android:layout_height="match_parent"
                 android:layout_weight="0.15"
                 android:adjustViewBounds="true"

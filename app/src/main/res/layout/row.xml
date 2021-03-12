@@ -8,6 +8,8 @@
         android:id="@+id/cb_app"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:scaleX="1.70"
+        android:scaleY="1.70"
         android:layout_margin="15dp"
         android:focusable="false"
         />
@@ -34,7 +36,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/app_paackage"
+            android:id="@+id/app_package"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical" />

@@ -46,7 +46,7 @@ public class ApplicationAdapter extends ArrayAdapter<AppInfo> implements Compoun
                 holder = new AppInfoHolder();
                 holder.imgIcon = (ImageView) row.findViewById(R.id.app_icon);
                 holder.txtTitle = (TextView) row.findViewById(R.id.app_name);
-                holder.packageName = (TextView) row.findViewById(R.id.app_paackage);
+                holder.packageName = (TextView) row.findViewById(R.id.app_package);
                 holder.chkSelect = (CheckBox) row.findViewById(R.id.cb_app);
 
                 row.setTag(holder);
