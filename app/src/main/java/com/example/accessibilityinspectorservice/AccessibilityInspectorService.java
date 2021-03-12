@@ -196,6 +196,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         String hintText;
         String labeledByElement;
         String className;
+        String shortAppName;
         String logString = "";
 
         if (nodeInfo == null) return;
@@ -263,7 +264,19 @@ public class AccessibilityInspectorService extends AccessibilityService {
             className = "-";
         }
 
-        AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName, className, rect);
+        if(nodeInfo.getPackageName()!=null){
+            // split by "." to get class name
+            String currentString  = nodeInfo.getPackageName().toString();
+            String [] separated = currentString.split("\\.");
+            shortAppName = separated[separated.length-1];
+        }
+
+        else {
+            shortAppName = "-";
+        }
+
+
+        AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, shortAppName, className, rect);
         nodeInfoButton.setText(String.valueOf(nodeCounter));
         //ToDo: accessibility Richtlinien auch bei Service:
         //nodeInfoButton.setContentDescription("auto button");
