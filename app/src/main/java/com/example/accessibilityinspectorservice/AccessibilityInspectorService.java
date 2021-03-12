@@ -77,6 +77,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     final String sharedPrefTextsize = "text_size_pref_inspector";
     int showButtonCounter = 0;
     boolean elementsHighlighted = true;
+    Toast myToast;
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -135,6 +136,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
                     //ToDo: OR Teil entfernen - nur für testing
                     if(appsWhitelist.contains(currentPackageName)||currentPackageName.equals("com.example.emptytestapp")){
                             removeHighlights();
+                        showButtonCounter = 1;
+
 
                         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
                         nodeButtonsList = new ArrayList();
@@ -154,20 +157,24 @@ public class AccessibilityInspectorService extends AccessibilityService {
                         //ToDo: wm.updateViewLayout();
                         Log.w("Scrolled =", " yes");
 
-                        //ToDo: 12_3
-                        //removeHighlights();
-                        //logNodeHierarchy(getRootInActiveWindow(), 0);
-                        //removeWindows();
+                        if(appsWhitelist.contains(currentPackageName)||currentPackageName.equals("com.example.emptytestapp")) {
+                            //removeWindows();
+                            displayToast("Scrollen noch nicht implementiert");
 
-
-/*                    else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
-                        removeWindows();
-                    }*/
+                        }
                     }
                 }
 
         }
 
+    }
+
+    public void displayToast(String message) {
+        if(myToast != null)
+            myToast.cancel();
+        myToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        myToast.setGravity(Gravity.TOP, 0, 300); //<-- set gravity here
+        myToast.show();
     }
 
 
@@ -254,6 +261,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         String keyword_one = "layout";
         String keyword_two = "scrollview";
+        String keyword_three = "ViewGroup";
+        String keyword_four = "RecyclerView";
 
         if (!className.toLowerCase().contains(keyword_one.toLowerCase() ) && !className.toLowerCase().contains(keyword_two.toLowerCase() ) ) {
 
