@@ -24,14 +24,15 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
     String hintText;
     String labeledByElement;
     String appName;
+    String className;
     Rect coordinates;
 
 
     public AccessNodeButton(Context context) {
-        this(context, 0, null, null, null, null, null, null);
+        this(context, 0, null, null, null, null, null, null, null);
     }
 
-    public AccessNodeButton(Context context, int btnCounter, String viewText, String contentDescription, String hintText, String labeledByElement, String appName, Rect coordinates) {
+    public AccessNodeButton(Context context, int btnCounter, String viewText, String contentDescription, String hintText, String labeledByElement, String appName, String className, Rect coordinates) {
         super(context);
         init();
         this.btnCounter = btnCounter;
@@ -41,6 +42,7 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
         this.labeledByElement = labeledByElement;
         this.context = context;
         this.appName = appName;
+        this.className = className;
         this.coordinates = coordinates;
     }
 
@@ -56,7 +58,7 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
     }
 
     public String getInformationString(){
-        String InformationString = "<b>Element Nummer:</b> " + btnCounter + "<br><b>View Text: </b>" + viewText + "<br><b>Inhaltslabel: </b> " + contentDescription + "<br><b>Zugeh. Label: </b>"+ labeledByElement + "<br><b>Hint: </b>" + hintText;
+        String InformationString = "<b>Element Nummer:</b> " + btnCounter + "<br><b>View Text: </b>" + viewText + "<br><b>Inhaltslabel: </b> " + contentDescription + "<br><b>Zugeh. Label: </b>"+ labeledByElement +  "<br><b>Type: </b>" + className;
         return InformationString;
     }
 
@@ -83,6 +85,10 @@ public class AccessNodeButton extends androidx.appcompat.widget.AppCompatButton 
     public String getElementHint(){
         return hintText;
 
+    }
+
+    public String getClassName(){
+        return className;
     }
 
     public Rect getCoordinates(){

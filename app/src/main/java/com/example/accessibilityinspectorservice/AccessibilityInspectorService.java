@@ -87,6 +87,20 @@ public class AccessibilityInspectorService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent e) {
 
+        //ToDo: 12_3
+        Log.w("EVENT TYPE", AccessibilityEvent.eventTypeToString(e.getEventType()));
+
+
+        //System.out.println(e.getEventType().toString());
+        // Funktioniert //if (e.getEventType() == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
+
+            //if (e.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            //Log.w("COn Changed=", " yes");
+
+
+        //Log.v("EVENT TYPE: ", e.getEventTypeToString());
+        //removeWindows();
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sharedPrefsHolder = prefs.getString(sharedPrefLabel, "defaultStringIfNothingFound");
         sharedPrefColorsHolder = prefs.getString(sharedPrefColors, "#000000");
@@ -132,10 +146,21 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
                 }
 
-                case AccessibilityEvent.TYPE_VIEW_SCROLLED:{
-                    //ToDo: wm.updateViewLayout();
+                    case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
+                        //ToDo: wm.updateViewLayout();
+                        Log.w("Scrolled =", " yes");
+
+                        //ToDo: 12_3
+                        //removeHighlights();
+                        //logNodeHierarchy(getRootInActiveWindow(), 0);
+                        //removeWindows();
+
+
+/*                    else if (!e.getPackageName().equals("com.example.accessibilityserviceappv2") && !appsWhitelist.contains(e.getPackageName().toString())) {
+                        removeWindows();
+                    }*/
+                    }
                 }
-            }
 
         }
 
@@ -170,6 +195,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         String viewText;
         String hintText;
         String labeledByElement;
+        String className;
         String logString = "";
 
         if (nodeInfo == null) return;
@@ -226,7 +252,18 @@ public class AccessibilityInspectorService extends AccessibilityService {
             labeledByElement = "-";
         }
 
-        AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName, rect);
+        if(nodeInfo.getClassName()!=null){
+            // split by "." to get class name
+            String currentString  = nodeInfo.getClassName().toString();
+            String [] separated = currentString.split("\\.");
+            className = separated[separated.length-1];
+        }
+
+        else {
+            className = "-";
+        }
+
+        AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, appName, className, rect);
         nodeInfoButton.setText(String.valueOf(nodeCounter));
         //ToDo: accessibility Richtlinien auch bei Service:
         //nodeInfoButton.setContentDescription("auto button");
@@ -625,7 +662,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         String csvData;
        // String currentDate = df.toString();
         StringWriter sw = new StringWriter();
-        String csvHeader = "Element-Nr, Beschriftung, Inhalts-Label, Hint, Zugeh. Label, Datum/ Zeit, Applikation";
+        String csvHeader = "Element-Nr, Beschriftung, Inhalts-Label, Hint, Zugeh. Label, Element-Typ, Datum/ Zeit, Applikation";
 
         sw.append(csvHeader);
 
@@ -642,6 +679,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
             sw.append(ab.getElementHint());
             sw.append(",");
             sw.append(ab.getLabeledByElement());
+            sw.append(",");
+            sw.append(ab.getClassName());
             sw.append(",");
             sw.append(currentDate);
             sw.append(",");
