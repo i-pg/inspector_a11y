@@ -60,6 +60,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
     View floatingInfobox;
     String viewElementDataString;
 
+    WindowManager.LayoutParams infoWindowParams = new WindowManager.LayoutParams();
+
+
     Boolean floatingInfoBoxIsSet = false;
     WindowManager wm;
 
@@ -77,6 +80,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
     int showButtonCounter = 0;
     boolean elementsHighlighted = true;
     Toast myToast;
+    int y;
+    float touchedY;
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -124,6 +129,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
 
                     if(appsWhitelist.contains(currentPackageName)){
+
+                        infoWindowParams.gravity = Gravity.BOTTOM;
+                        infoWindowParams.x = 0;
+                        infoWindowParams.y = 0;
 
                         removeHighlights();
                         showButtonCounter = 1;
@@ -311,15 +320,12 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
 
         //Infobox Layout Params
-        WindowManager.LayoutParams infoWindowParams = new WindowManager.LayoutParams();
         infoWindowParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
         infoWindowParams.format = PixelFormat.TRANSLUCENT;
         infoWindowParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         infoWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         infoWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        infoWindowParams.gravity = Gravity.BOTTOM;
-        infoWindowParams.x = 0;
-        infoWindowParams.y = 0;
+
 
 
         //Get Buttons and Textview in Infobox
@@ -447,8 +453,8 @@ public class AccessibilityInspectorService extends AccessibilityService {
         floatingInfobox.setOnTouchListener(new View.OnTouchListener() {
 
             private WindowManager.LayoutParams updateParameters = infoWindowParams;
-            int y;
-            float touchedY;
+
+
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -469,6 +475,9 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 return false;
             }
         });
+
+
+
         wm.addView(floatingInfobox,infoWindowParams);
         floatingInfoBoxIsSet = true;
 
