@@ -79,7 +79,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     final String sharedPrefColors = "highlight_color_pref_inspector";
     final String sharedPrefTextsize = "text_size_pref_inspector";
     int showButtonCounter = 0;
-    boolean elementsHighlighted;
+    boolean elementsHighlighted = true;
     Toast myToast;
     int y;
     float touchedY;
@@ -130,7 +130,6 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
 
                     if(appsWhitelist.contains(currentPackageName)){
-                        elementsHighlighted = true;
 
                         infoWindowParams.gravity = Gravity.BOTTOM;
                         infoWindowParams.x = 0;
@@ -144,6 +143,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                         appName =  e.getPackageName().toString();
                         //log tree of all AccessibilityNodes
                         logNodeHierarchy(getRootInActiveWindow(), 0);
+                        elementsHighlighted = true;
                         //Init Floating Window
                         viewElementDataString = "Gefundene Elemente: " + nodeButtonsList.size();
                         showFloatingInfoWindow(viewElementDataString);
@@ -248,7 +248,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
         }
 
 
-        //Filter Layout Elments
+        //Filter Layout Elements
         String keyword_one = "layout";
         String keyword_two = "scrollview";
         String keyword_three = "ViewGroup";
