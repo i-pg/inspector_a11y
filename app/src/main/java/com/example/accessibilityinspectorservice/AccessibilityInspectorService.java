@@ -68,6 +68,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
     // Liste in der alle viewElementInformationButtons gespeichert werden
     List <AccessNodeButton> nodeButtonsList;
+    List<String> appsWhitelist;
     Button shareButton;
     String appName;
     String sharedPrefsHolder;
@@ -78,7 +79,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
     final String sharedPrefColors = "highlight_color_pref_inspector";
     final String sharedPrefTextsize = "text_size_pref_inspector";
     int showButtonCounter = 0;
-    boolean elementsHighlighted = true;
+    boolean elementsHighlighted;
     Toast myToast;
     int y;
     float touchedY;
@@ -106,7 +107,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         //Whitelist - Apps to Inspect
         String splitHelperString = sharedPrefsHolder;
-        List<String> appsWhitelist = Arrays.asList(splitHelperString.split(";"));
+        appsWhitelist = Arrays.asList(splitHelperString.split(";"));
 
         nodeCounter = 1;
         String currentPackageName = "init text";
@@ -129,6 +130,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
 
                     if(appsWhitelist.contains(currentPackageName)){
+                        elementsHighlighted = true;
 
                         infoWindowParams.gravity = Gravity.BOTTOM;
                         infoWindowParams.x = 0;
@@ -254,47 +256,37 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         if (!className.toLowerCase().contains(keyword_one.toLowerCase() ) && !className.toLowerCase().contains(keyword_two.toLowerCase() ) ) {
 
-            //Node coordinates
-            nodeInfo.getBoundsInScreen(rect);
-            Context context = getApplicationContext();
+            //recheck whitelist before drawing
+            if(appsWhitelist.contains(nodeInfo.getPackageName())) {
+                //Node coordinates
+                nodeInfo.getBoundsInScreen(rect);
+                Context context = getApplicationContext();
 
-            //Params for AccessNodeButtons
-            WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
 
-            nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-            nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
-            nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
-            nodeLayoutParams.width = rect.width();
-            nodeLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
-            nodeLayoutParams.x = rect.left;
-            nodeLayoutParams.y = rect.top - 70;
+                //Create AccessNodeButton (Clickable Numbers and Frames for discorverd View Elements
+                AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, shortAppName, className, rect);
+                nodeInfoButton.setText(String.valueOf(nodeCounter));
+                nodeInfoButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                nodeInfoButton.setPadding(20, 30, 20, 20);
 
-            //Create AccessNodeButton (Clickable Numbers and Frames for discorverd View Elements
-            AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, shortAppName, className, rect);
-            nodeInfoButton.setText(String.valueOf(nodeCounter));
-            nodeInfoButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            nodeInfoButton.setPadding(20, 30, 20, 20);
+                //Set border color of highlighted Elements
+                nodeInfoButton.setBackground(drawHightlightShapeDrawable());
 
-            //Highlight Elements
-            ShapeDrawable nodeInfoButtonShape = new ShapeDrawable();
-            nodeInfoButtonShape.setShape(new RectShape());
-            nodeInfoButtonShape.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
-            nodeInfoButtonShape.getPaint().setStrokeWidth(10f);
-            nodeInfoButtonShape.getPaint().setStyle(Paint.Style.STROKE);
-            nodeInfoButton.setBackground(nodeInfoButtonShape);
 
-            //On Click: Show Information in Infobox
-            nodeInfoButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    viewElementDataString = nodeInfoButton.getInformationString();
-                    showFloatingInfoWindow(viewElementDataString);
-                }
-            });
+                //Get LayoutParams AccessNode Elements and add View
+                wm.addView(nodeInfoButton, setNodeLayoutParams(rect));
+                nodeButtonsList.add(nodeInfoButton);
+                nodeCounter++;
 
-            wm.addView(nodeInfoButton, nodeLayoutParams);
-            nodeButtonsList.add(nodeInfoButton);
-            nodeCounter++;
+
+                //On Click: Show Information in Infobox
+                nodeInfoButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        viewElementDataString = nodeInfoButton.getInformationString();
+                        showFloatingInfoWindow(viewElementDataString);
+                    }
+                });
+            }
         }
 
         //repeat for each Element in tree
@@ -503,28 +495,10 @@ public class AccessibilityInspectorService extends AccessibilityService {
 
         removeHighlights();
         Rect coordinates = currentElement.getCoordinates();
-        Context context = getApplicationContext();
-
         //Set the border color of the highlighted Elements
-        ShapeDrawable shapedrawable = new ShapeDrawable();
-        shapedrawable.setShape(new RectShape());
-        shapedrawable.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
-        shapedrawable.getPaint().setStrokeWidth(20f);
-        shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
-        currentElement.setBackground(shapedrawable);
-
+        currentElement.setBackground(drawHightlightShapeDrawable());
         //Layout Params AccessNode Elements
-        WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
-        nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-        nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
-        nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
-        nodeLayoutParams.width = coordinates.width();
-        nodeLayoutParams.height = coordinates.height();
-        nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
-        nodeLayoutParams.x = coordinates.left;
-        nodeLayoutParams.y = coordinates.top - 70;
-
-        wm.addView(currentElement, nodeLayoutParams);
+        wm.addView(currentElement, setNodeLayoutParams(coordinates));
     }
 
     //show highlights - select all elements
@@ -533,33 +507,13 @@ public class AccessibilityInspectorService extends AccessibilityService {
         if(!elementsHighlighted){
 
             for(AccessNodeButton aB:nodeButtonsList){
-
                 Rect coordinates = aB.getCoordinates();
-
                 //Set the border color of the highlighted Elements
-                ShapeDrawable shapedrawable = new ShapeDrawable();
-                shapedrawable.setShape(new RectShape());
-                shapedrawable.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
-                shapedrawable.getPaint().setStrokeWidth(20f);
-                shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
-                aB.setBackground(shapedrawable);
-
-                //Layout Params AccessNode Elements
-                WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
-                nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-                nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
-                nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                nodeLayoutParams.width = coordinates.width();
-                nodeLayoutParams.height = coordinates.height();
-                nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
-                nodeLayoutParams.x = coordinates.left;
-                nodeLayoutParams.y = coordinates.top - 70;
-
-
+                aB.setBackground(drawHightlightShapeDrawable());
+                //get LayoutParams AccessNode Elements and add View
                 if(aB.getWindowToken() == null){
-                    wm.addView(aB, nodeLayoutParams);
+                    wm.addView(aB, setNodeLayoutParams(coordinates));
                 }
-
             }
 
             elementsHighlighted=true;
@@ -581,6 +535,29 @@ public class AccessibilityInspectorService extends AccessibilityService {
         myToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         myToast.setGravity(Gravity.TOP, 0, 300); //<-- set gravity here
         myToast.show();
+    }
+
+    public ShapeDrawable drawHightlightShapeDrawable(){
+        ShapeDrawable shapedrawable = new ShapeDrawable();
+        shapedrawable.setShape(new RectShape());
+        shapedrawable.getPaint().setColor(Color.parseColor(sharedPrefColorsHolder));
+        shapedrawable.getPaint().setStrokeWidth(20f);
+        shapedrawable.getPaint().setStyle(Paint.Style.STROKE);
+        return shapedrawable;
+    }
+
+    public WindowManager.LayoutParams setNodeLayoutParams(Rect coordinates){
+
+        WindowManager.LayoutParams nodeLayoutParams = new WindowManager.LayoutParams();
+        nodeLayoutParams.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
+        nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        nodeLayoutParams.width = coordinates.width();
+        nodeLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
+        nodeLayoutParams.x = coordinates.left;
+        nodeLayoutParams.y = coordinates.top - 70;
+        return nodeLayoutParams;
     }
 
     /*
