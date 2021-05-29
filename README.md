@@ -30,6 +30,6 @@ an accessibility service. When you first open the app it will guide you through 
 
 **Step 4**: Open the app you want to inspect
 
-
+# License
 
 **The App is licensed under the Apache 2.0 License**
