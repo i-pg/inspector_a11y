@@ -1,5 +1,7 @@
 # Install 
 
+**To use the app Android 8 ("Oreo") or newer is required**
+
 ### Prepare Android Device
 1. Open your phone's **Settings**
 2. Go to **Security & privacy** > **More settings**
