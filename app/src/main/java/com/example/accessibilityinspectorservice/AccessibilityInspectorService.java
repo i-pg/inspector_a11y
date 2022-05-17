@@ -267,7 +267,7 @@ public class AccessibilityInspectorService extends AccessibilityService {
                 AccessNodeButton nodeInfoButton = new AccessNodeButton(context, nodeCounter, viewText, contentDescription, hintText, labeledByElement, shortAppName, className, rect);
                 nodeInfoButton.setText(String.valueOf(nodeCounter));
                 nodeInfoButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                nodeInfoButton.setPadding(20, 30, 20, 20);
+                //nodeInfoButton.setPadding(20, 30, 20, 20);
 
                 //Set border color of highlighted Elements
                 nodeInfoButton.setBackground(drawHightlightShapeDrawable());
@@ -553,10 +553,11 @@ public class AccessibilityInspectorService extends AccessibilityService {
         nodeLayoutParams.format = PixelFormat.TRANSLUCENT;
         nodeLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_FULLSCREEN;
         nodeLayoutParams.width = coordinates.width();
-        nodeLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        //nodeLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        nodeLayoutParams.height = coordinates.height();
         nodeLayoutParams.gravity = Gravity.TOP | Gravity.START;
         nodeLayoutParams.x = coordinates.left;
-        nodeLayoutParams.y = coordinates.top - 70;
+        nodeLayoutParams.y = coordinates.top - 100;
         return nodeLayoutParams;
     }
 
